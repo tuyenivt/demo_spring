@@ -18,4 +18,9 @@ public class TennisCoachTest extends BaseTest {
         System.out.println(coach.getDailyWorkout());
     }
 
+    @Test
+    public void testGetDailyFortune() {
+        System.out.println(coach.getDailyFortune());
+    }
+
 }
