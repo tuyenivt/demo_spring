@@ -16,10 +16,18 @@ public class TennisCoach implements Coach {
     }
 
     @Autowired
-    public void setFortuneService(FortuneService fortuneService) {
-        System.out.println("TennisCoach: setFortuneService");
+    public void tryToSetFortuneService(FortuneService fortuneService) {
+        System.out.println("TennisCoach: inside tryToSetFortuneService method");
         this.fortuneService = fortuneService;
     }
+
+    /*
+    @Autowired
+    public void setFortuneService(FortuneService fortuneService) {
+        System.out.println("TennisCoach: inside setFortuneService medthod");
+        this.fortuneService = fortuneService;
+    }
+    */
 
     /*
     @Autowired
