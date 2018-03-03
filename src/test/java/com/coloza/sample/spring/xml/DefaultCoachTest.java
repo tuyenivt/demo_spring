@@ -1,7 +1,9 @@
-package com.coloza.sample.spring;
+package com.coloza.sample.spring.xml;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.coloza.sample.spring.Coach;
 
 public class DefaultCoachTest extends BaseXmlTest {
 

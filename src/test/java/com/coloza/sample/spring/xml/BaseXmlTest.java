@@ -1,4 +1,4 @@
-package com.coloza.sample.spring;
+package com.coloza.sample.spring.xml;
 
 import org.junit.After;
 import org.junit.Before;
