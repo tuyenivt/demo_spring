@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public abstract class BaseTest {
+public abstract class BaseXmlTest {
 
     protected ClassPathXmlApplicationContext context;
 

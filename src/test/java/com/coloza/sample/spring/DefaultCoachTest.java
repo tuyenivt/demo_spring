@@ -3,7 +3,7 @@ package com.coloza.sample.spring;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DefaultCoachTest extends BaseTest {
+public class DefaultCoachTest extends BaseXmlTest {
 
     private Coach coach;
 
