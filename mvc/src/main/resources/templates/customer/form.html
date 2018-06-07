@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <form action="#" th:action="@{result}" th:object="${customer}" method="post">
+        <p>First Name: <input type="text" th:field="*{firstName}" placeholder="Your first name?"/></p>
+        <p>Last Name (*): <input type="text" th:field="*{lastName}" placeholder="Your last name?"/> <span class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span></p>
+        <p>Age: <input type="text" th:field="*{age}" placeholder="Your age?"/> <span class="error" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></span></p>
+        <p>Postal Code: <input type="text" th:field="*{postalCode}" placeholder="Your postal code?"/> <span class="error" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></span></p>
+        <p>Course Code: <input type="text" th:field="*{courseCode}" placeholder="Your course code?"/> <span class="error" th:if="${#fields.hasErrors('courseCode')}" th:errors="*{courseCode}"></span></p>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
