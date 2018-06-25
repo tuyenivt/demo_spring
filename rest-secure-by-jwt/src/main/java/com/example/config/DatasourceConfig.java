@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DatasourceConfig {
 
     @Bean
-    public DataSource dataSource() {
+    public DataSource datasource() {
         EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
         EmbeddedDatabase dataSource = builder
                 .setType(EmbeddedDatabaseType.H2)
