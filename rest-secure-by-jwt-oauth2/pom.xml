@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>rest-secure-by-jwt</artifactId>
+    <artifactId>rest-secure-by-jwt-oauth2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>rest-secure-by-jwt</name>
+    <name>rest-secure-by-jwt-oauth2</name>
     <description>Demo project for Spring Boot</description>
 
     <parent>
