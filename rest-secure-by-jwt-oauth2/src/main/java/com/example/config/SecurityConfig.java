@@ -6,6 +6,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -80,18 +81,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         defaultTokenServices.setSupportRefreshToken(true);
         return defaultTokenServices;
     }
-    
+
+    /**
+     * Allowing all origins, headers and methods here is only intended to keep this example simple
+     * Http.post request becomes OPTIONS when setting headers
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+     * Use it if you got exception: Response for preflight has invalid HTTP status code 401
+     */
     @Bean
-    public FilterRegistrationBean corsFilter() {
+    public FilterRegistrationBean corsFilterRegistrationBean() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedOrigin("*"); // Arrays.asList("https://localhost:4200")
+        configuration.addAllowedMethod("*"); // Arrays.asList("GET","POST")
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", configuration);
         FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(0);
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
 }
