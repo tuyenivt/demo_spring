@@ -8,7 +8,7 @@ import com.example.aop.aspect.LogExecutionTime;
 public class Service {
 
     @LogExecutionTime
-    public void serve() throws InterruptedException {
-        Thread.sleep(2000);
+    public void serve(int factor) throws InterruptedException {
+        Thread.sleep(factor * 1000);
     }
 }

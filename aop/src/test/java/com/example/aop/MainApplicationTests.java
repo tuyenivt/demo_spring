@@ -19,9 +19,12 @@ public class MainApplicationTests {
 
     @Test
     public void testServe() throws InterruptedException {
-        System.out.println("testServe - before");
-        service.serve();
-        System.out.println("testServe - after");
+        System.out.println("testServe - before - factor 1");
+        service.serve(1);
+        System.out.println("testServe - after - factor 1");
+        System.out.println("testServe - before - factor 2");
+        service.serve(2);
+        System.out.println("testServe - after - factor 2");
     }
 
 }
