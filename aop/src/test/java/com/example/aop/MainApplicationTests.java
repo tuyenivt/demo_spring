@@ -31,4 +31,11 @@ public class MainApplicationTests {
         logger.info("testServe - after - factor 2");
     }
 
+    @Test
+    public void testAddAccount() {
+        logger.info("testAddAccount - before");
+        service.addAccount();
+        logger.info("testAddAccount - after");
+    }
+
 }
