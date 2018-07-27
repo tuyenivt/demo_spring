@@ -8,7 +8,7 @@ import com.example.aop.dao.AccountDao;
 
 @Component
 public class Service {
-    
+
     @Autowired
     private AccountDao accountDao;
 
@@ -16,7 +16,7 @@ public class Service {
     public void serve(int factor) throws InterruptedException {
         Thread.sleep(factor * 1000);
     }
-    
+
     public void addAccount() {
         accountDao.add();
     }
