@@ -15,21 +15,21 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class CustomAspect {
-	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+    
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // Pointcut declaration
-	@Pointcut("@annotation(LogExecutionTime)")
-	private void forAnnotationLogExecutionTime() {}
+    @Pointcut("@annotation(LogExecutionTime)")
+    private void forAnnotationLogExecutionTime() {}
 
     // Around Advice
     @Around("forAnnotationLogExecutionTime()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-    	// get method signature
-    	Signature signature = joinPoint.getSignature();
-    	// get method arguments
-    	Object[] args = joinPoint.getArgs();
-    	logger.info("joinPoint - around - signature:" + signature + " - arguments:" + Arrays.deepToString(args));
+        // get method signature
+        Signature signature = joinPoint.getSignature();
+        // get method arguments
+        Object[] args = joinPoint.getArgs();
+        logger.info("joinPoint - around - signature:" + signature + " - arguments:" + Arrays.deepToString(args));
         long start = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();
         long executionTime = System.currentTimeMillis() - start;
