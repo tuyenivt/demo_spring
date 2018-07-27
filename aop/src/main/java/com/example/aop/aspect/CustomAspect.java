@@ -1,9 +1,12 @@
 package com.example.aop.aspect;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -11,6 +14,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.example.aop.entity.Account;
 
 @Aspect
 @Component
@@ -41,6 +46,13 @@ public class CustomAspect {
     @Before("execution(public void com.example.aop.dao.AccountDao.add())")
     public void beforeAddAccount() {
         logger.info("beforeAddAccount - executing Before Advice on AccountDao.add()");
+    }
+
+    // AfterReturning Advice
+    @AfterReturning(pointcut = "execution(* com.example.aop.dao.AccountDao.find(..))", returning = "result")
+    public void afterReturningFindAccountAdvice(JoinPoint joinPoint, List<Account> result) {
+        logger.info("afterReturningFindAccount - executing AfterReturning Advice on AccountDao.find() with result is " + result);
+        result.add(new Account(1, "Tom"));
     }
 
 }
