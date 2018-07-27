@@ -1,5 +1,7 @@
 package com.example.aop;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -12,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class MainApplicationTests {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private Service service;
@@ -23,7 +25,7 @@ public class MainApplicationTests {
 
     @Test
     public void testServe() throws InterruptedException {
-    	logger.info("testServe - before - factor 1");
+        logger.info("testServe - before - factor 1");
         service.serve(1);
         logger.info("testServe - after - factor 1");
         logger.info("testServe - before - factor 2");
@@ -36,6 +38,13 @@ public class MainApplicationTests {
         logger.info("testAddAccount - before");
         service.addAccount();
         logger.info("testAddAccount - after");
+    }
+
+    @Test
+    public void testFindAccounts() {
+        logger.info("testFindAccounts - before");
+        service.findAccounts(Arrays.asList(1, 2, 3, 4, 5));
+        logger.info("testFindAccounts - after");
     }
 
 }
