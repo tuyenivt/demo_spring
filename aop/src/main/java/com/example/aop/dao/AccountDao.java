@@ -10,11 +10,15 @@ import com.example.aop.entity.Account;
 @Component
 public class AccountDao {
 
+    public List<Account> find(List<Integer> ids) {
+        return new ArrayList<>();
+    }
+
     public void add() {
 
     }
 
-    public List<Account> find(List<Integer> ids) {
-        return new ArrayList<>();
+    public void delete(int id) {
+        throw new RuntimeException("not allowed delete any account");
     }
 }
