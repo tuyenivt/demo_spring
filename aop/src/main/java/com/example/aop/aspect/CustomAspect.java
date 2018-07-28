@@ -6,6 +6,7 @@ import java.util.List;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
@@ -69,5 +70,12 @@ public class CustomAspect {
     public void afterThrowingDeleteAccountAdvice(JoinPoint joinPoint, Throwable exception) {
         logger.info("afterThrowingDeleteAccount - executing AfterThrowing Advice on AccountDao.delete() - exception: " + exception);
     }
-
+    
+    // After Advice : look like finally, will execute even success or exception
+    // After Advice will execute before after returning advice or after throwing advice
+    @After("forAccountDaoFind() || forAccountDaoDelete()")
+    public void afterFindOrDeleteAccount(JoinPoint joinPoint) {
+        logger.info("afterFindOrDeleteAccount - executing After Advice on " + joinPoint.getSignature());
+    }
+    
 }
