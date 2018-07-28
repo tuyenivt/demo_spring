@@ -24,14 +24,18 @@ public class Service {
         Thread.sleep(factor * 1000);
     }
 
-    public void addAccount() {
-        accountDao.add();
-    }
-
     public List<Account> findAccounts(List<Integer> ids) {
         logger.info("addAccount - executing...");
         List<Account> found = accountDao.find(ids);
         logger.info("addAccount - returned result is " + found);
         return found;
+    }
+
+    public void addAccount() {
+        accountDao.add();
+    }
+
+    public void deleteAccount(int id) {
+        accountDao.delete(id);
     }
 }

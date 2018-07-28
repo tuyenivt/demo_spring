@@ -34,6 +34,13 @@ public class MainApplicationTests {
     }
 
     @Test
+    public void testFindAccounts() {
+        logger.info("testFindAccounts - before");
+        service.findAccounts(Arrays.asList(1, 2, 3, 4, 5));
+        logger.info("testFindAccounts - after");
+    }
+
+    @Test
     public void testAddAccount() {
         logger.info("testAddAccount - before");
         service.addAccount();
@@ -41,10 +48,10 @@ public class MainApplicationTests {
     }
 
     @Test
-    public void testFindAccounts() {
-        logger.info("testFindAccounts - before");
-        service.findAccounts(Arrays.asList(1, 2, 3, 4, 5));
-        logger.info("testFindAccounts - after");
+    public void testDeleteAccount() {
+        logger.info("testDeleteAccount - before");
+        service.deleteAccount(1);
+        logger.info("testDeleteAccount - after");
     }
 
 }

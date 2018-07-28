@@ -7,6 +7,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -53,6 +54,14 @@ public class CustomAspect {
     public void afterReturningFindAccountAdvice(JoinPoint joinPoint, List<Account> result) {
         logger.info("afterReturningFindAccount - executing AfterReturning Advice on AccountDao.find() with result is " + result);
         result.add(new Account(1, "Tom"));
+    }
+
+    // AfterThrowing Advice
+    // the exception is still propagated back to AOP proxy, and then the exception is propagated back to the main application
+    // if you want to stop the exception propagation then use the @Around advice
+    @AfterThrowing(pointcut = "execution(* com.example.aop.dao.AccountDao.delete(*))", throwing = "exception")
+    public void afterThrowingDeleteAccountAdvice(JoinPoint joinPoint, Throwable exception) {
+        logger.info("afterThrowingDeleteAccount - executing AfterThrowing Advice on AccountDao.delete() - exception: " + exception);
     }
 
 }
