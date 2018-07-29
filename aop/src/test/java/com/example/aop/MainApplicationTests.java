@@ -43,6 +43,14 @@ public class MainApplicationTests {
     }
 
     @Test
+    public void testFindAccountsOrExceptionIfNotFound() {
+        logger.info("testFindAccountsOrExceptionIfNotFound - before");
+        service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
+        logger.info("testFindAccountsOrExceptionIfNotFound - after");
+    }
+
+
+    @Test
     public void testAddAccount() {
         logger.info("testAddAccount - before");
         service.addAccount();

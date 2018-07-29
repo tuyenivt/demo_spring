@@ -22,7 +22,7 @@ import com.example.aop.entity.Account;
 @Aspect
 @Component
 public class CustomAspect {
-    
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // Pointcut declaration
@@ -43,13 +43,13 @@ public class CustomAspect {
         logger.info("joinPoint - around - signature:" + signature + " - executed in " + executionTime + "ms");
         return proceed;
     }
-    
+
     // Before Advice
     @Before("execution(public void com.example.aop.dao.AccountDao.add())")
     public void beforeAddAccount() {
         logger.info("beforeAddAccount - executing Before Advice on AccountDao.add()");
     }
-    
+
     @Pointcut("execution(* com.example.aop.dao.AccountDao.find(..))")
     private void forAccountDaoFind() {}
 
@@ -62,7 +62,7 @@ public class CustomAspect {
 
     @Pointcut("execution(* com.example.aop.dao.AccountDao.delete(*))")
     private void forAccountDaoDelete() {}
-    
+
     // AfterThrowing Advice
     // the exception is still propagated back to AOP proxy, and then the exception is propagated back to the main application
     // if you want to stop the exception propagation then use the @Around advice
@@ -70,12 +70,26 @@ public class CustomAspect {
     public void afterThrowingDeleteAccountAdvice(JoinPoint joinPoint, Throwable exception) {
         logger.info("afterThrowingDeleteAccount - executing AfterThrowing Advice on AccountDao.delete() - exception: " + exception);
     }
-    
+
     // After Advice : look like finally, will execute even success or exception
     // After Advice will execute before after returning advice or after throwing advice
     @After("forAccountDaoFind() || forAccountDaoDelete()")
     public void afterFindOrDeleteAccount(JoinPoint joinPoint) {
         logger.info("afterFindOrDeleteAccount - executing After Advice on " + joinPoint.getSignature());
     }
-    
+
+    // Around Advice : rethrow exception
+    @Around("execution(* com.example.aop.dao.AccountDao.findOrExceptionIfNotFound(..))")
+    public Object aroundFindOrExceptionIfNotFoundAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object proceed = null;
+        try {
+            proceed = joinPoint.proceed();
+        } catch (Exception e) {
+            logger.info("aroundFindOrExceptionIfNotFoundAdvice - executing Around Advice on AccountDao.FindOrExceptionIfNotFound() - exception: " + e);
+            logger.info("aroundFindOrExceptionIfNotFoundAdvice - rethrowing exception");
+            throw e;
+        }
+        return proceed;
+    }
+
 }
