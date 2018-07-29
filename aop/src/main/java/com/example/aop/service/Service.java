@@ -25,9 +25,16 @@ public class Service {
     }
 
     public List<Account> findAccounts(List<Integer> ids) {
-        logger.info("addAccount - executing...");
+        logger.info("findAccounts - executing...");
         List<Account> found = accountDao.find(ids);
-        logger.info("addAccount - returned result is " + found);
+        logger.info("findAccounts - returned result is " + found);
+        return found;
+    }
+
+    public List<Account> findAccountsOrExceptionIfNotFound(List<Integer> ids) {
+        logger.info("findAccountsOrExceptionIfNotFound - executing...");
+        List<Account> found = accountDao.findOrExceptionIfNotFound(ids);
+        logger.info("findAccountsOrExceptionIfNotFound - returned result is " + found);
         return found;
     }
 

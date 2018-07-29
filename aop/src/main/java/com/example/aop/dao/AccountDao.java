@@ -14,6 +14,10 @@ public class AccountDao {
         return new ArrayList<>();
     }
 
+    public List<Account> findOrExceptionIfNotFound(List<Integer> ids) {
+        throw new RuntimeException("not found any account " + ids);
+    }
+
     public void add() {
 
     }
