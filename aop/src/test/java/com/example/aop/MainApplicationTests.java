@@ -1,5 +1,7 @@
 package com.example.aop;
 
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -45,10 +47,13 @@ public class MainApplicationTests {
     @Test
     public void testFindAccountsOrExceptionIfNotFound() {
         logger.info("testFindAccountsOrExceptionIfNotFound - before");
-        service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
-        logger.info("testFindAccountsOrExceptionIfNotFound - after");
+        try {
+        	service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
+        	fail();
+		} catch (Exception e) {
+			logger.info("testFindAccountsOrExceptionIfNotFound - after with exception:" + e);
+		}
     }
-
 
     @Test
     public void testAddAccount() {
@@ -60,8 +65,12 @@ public class MainApplicationTests {
     @Test
     public void testDeleteAccount() {
         logger.info("testDeleteAccount - before");
-        service.deleteAccount(1);
-        logger.info("testDeleteAccount - after");
+        try {
+        	service.deleteAccount(1);
+        	fail();
+		} catch (Exception e) {
+			logger.info("testDeleteAccount - after with exception:" + e);
+		}
     }
 
 }
