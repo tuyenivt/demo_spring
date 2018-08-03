@@ -9,12 +9,17 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>aop</module>
 		<module>basic</module>
 		<module>messaging-rabbitmq</module>
 		<module>mvc</module>
 		<module>rest-hateoas</module>
 		<module>rest-mongodb</module>
 		<module>rest-secure-by-jwt</module>
+		<module>rest-secure-by-jwt-oauth2</module>
+		<module>security</module>
+		<module>webflux-event-streaming</module>
+		<module>webflux-reactive-mongodb</module>
 	</modules>
 
 </project>
