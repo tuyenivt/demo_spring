@@ -6,7 +6,7 @@
 <body>
     <h1>Welcome to login page</h1>
     <p th:if="${param.error}" class="error" style="color: red">Wrong user or password</p>
-    <!-- ${pageContent.request.contextPath}/authenticateTheUser -->
+    <!--/* ${pageContent.request.contextPath}/authenticateTheUser */-->
     <form action="#" th:action="@{/my-authenticate}" method="post">
         <label for="username">Username</label>
         <input type="text" id="username" name="username">
