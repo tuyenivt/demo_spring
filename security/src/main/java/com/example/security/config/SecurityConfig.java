@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.User.UserBuilder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception { // config user
         @SuppressWarnings("deprecation") // for demo only
         UserBuilder users = User.withDefaultPasswordEncoder();
         auth.inMemoryAuthentication()
