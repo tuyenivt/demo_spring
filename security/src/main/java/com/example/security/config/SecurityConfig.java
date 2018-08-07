@@ -18,14 +18,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UserBuilder users = User.withDefaultPasswordEncoder();
         auth.inMemoryAuthentication()
             .withUser(users.username("john").password("123").roles("EMPLOYEE"))
-            .withUser(users.username("peter").password("123").roles("MANAGER"))
-            .withUser(users.username("frank").password("123").roles("ADMIN"));
+            .withUser(users.username("peter").password("123").roles("EMPLOYEE", "MANAGER"))
+            .withUser(users.username("frank").password("123").roles("EMPLOYEE", "ADMIN"));
     }
 
     @Override // configure security of web paths in application, login, logout, etc
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-            .anyRequest().authenticated()
+        	.antMatchers("/").hasRole("EMPLOYEE")
+        	.antMatchers("/leaders/**").hasRole("MANAGER")
+        	.antMatchers("/systems/**").hasRole("ADMIN")
             .and()
             .formLogin()
                 .loginPage("/my-login/")
