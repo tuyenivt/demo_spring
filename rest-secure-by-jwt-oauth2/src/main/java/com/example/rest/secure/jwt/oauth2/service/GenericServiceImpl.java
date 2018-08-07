@@ -1,4 +1,4 @@
-package com.example.rest.secure.jwt.oauth2.impl;
+package com.example.rest.secure.jwt.oauth2.service;
 
 import java.util.List;
 
@@ -9,7 +9,6 @@ import com.example.rest.secure.jwt.oauth2.domain.RandomCity;
 import com.example.rest.secure.jwt.oauth2.domain.User;
 import com.example.rest.secure.jwt.oauth2.repository.RandomCityRepository;
 import com.example.rest.secure.jwt.oauth2.repository.UserRepository;
-import com.example.rest.secure.jwt.oauth2.service.GenericService;
 
 @Service
 public class GenericServiceImpl implements GenericService {

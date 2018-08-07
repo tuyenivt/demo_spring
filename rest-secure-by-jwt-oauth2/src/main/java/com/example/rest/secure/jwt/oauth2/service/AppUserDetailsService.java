@@ -1,4 +1,4 @@
-package com.example.rest.secure.jwt.oauth2.impl;
+package com.example.rest.secure.jwt.oauth2.service;
 
 import java.util.ArrayList;
 import java.util.List;
