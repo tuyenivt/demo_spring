@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head><title>Home Page</title></head>
 <body>
-    Welcome to <strong th:text="${appName}">Our App</strong><br/>
-    This is <strong>Home Page</strong>
+    <p>Welcome to <strong th:text="${appName}">Our App</strong></p>
+    <p>This is <strong>Home Page</strong><span sec:authorize="isAuthenticated()">. You are authenticated users. Roles: <span sec:authentication="principal.authorities"></span></span></p>
+    <p sec:authorize="hasRole('MANAGER')"><a th:href="@{/leaders/}">Leadership Meeting</a>(only for Manager)</p>
+    <p sec:authorize="hasRole('ADMIN')"><a th:href="@{/systems/}">Systems Activity Logs</a>(only for Admin)</p>
     <form action="#" th:action="@{/logout}" method="post"><button type="submit">Logout</button></form>
 </body>
 </html>
