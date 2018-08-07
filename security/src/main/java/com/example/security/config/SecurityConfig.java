@@ -17,9 +17,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @SuppressWarnings("deprecation") // for demo only
         UserBuilder users = User.withDefaultPasswordEncoder();
         auth.inMemoryAuthentication()
-            .withUser(users.username("john").password("123456").roles("EMPLOYEE"))
-            .withUser(users.username("peter").password("123456").roles("MANAGER"))
-            .withUser(users.username("frank").password("123456").roles("ADMIN"));
+            .withUser(users.username("john").password("123").roles("EMPLOYEE"))
+            .withUser(users.username("peter").password("123").roles("MANAGER"))
+            .withUser(users.username("frank").password("123").roles("ADMIN"));
     }
 
     @Override // configure security of web paths in application, login, logout, etc
