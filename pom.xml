@@ -12,6 +12,7 @@
 		<module>aop</module>
 		<module>basic</module>
 		<module>messaging-rabbitmq</module>
+		<module>multiple-databases</module>
 		<module>mvc</module>
 		<module>rest-hateoas</module>
 		<module>rest-mongodb</module>
