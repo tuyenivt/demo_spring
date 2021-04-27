@@ -19,7 +19,7 @@
 		<module>rest-secure-by-jwt</module>
 		<module>rest-secure-by-jwt-oauth2</module>
 		<module>security</module>
-		<module>webflux-event-streaming</module>
+		<module>webflux</module>
 		<module>webflux-reactive-mongodb</module>
 	</modules>
 
