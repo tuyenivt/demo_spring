@@ -1,20 +1,15 @@
 package com.example.aop;
 
-import static org.junit.Assert.fail;
-
-import java.util.Arrays;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.example.aop.service.Service;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import com.example.aop.service.Service;
+import java.util.Arrays;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class MainApplicationTests {
 
@@ -48,11 +43,11 @@ public class MainApplicationTests {
     public void testFindAccountsOrExceptionIfNotFound() {
         logger.info("testFindAccountsOrExceptionIfNotFound - before");
         try {
-        	service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
-        	fail();
-		} catch (Exception e) {
-			logger.info("testFindAccountsOrExceptionIfNotFound - after with exception:" + e);
-		}
+            service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
+            Assertions.fail();
+        } catch (Exception e) {
+            logger.info("testFindAccountsOrExceptionIfNotFound - after with exception:" + e);
+        }
     }
 
     @Test
@@ -66,11 +61,11 @@ public class MainApplicationTests {
     public void testDeleteAccount() {
         logger.info("testDeleteAccount - before");
         try {
-        	service.deleteAccount(1);
-        	fail();
-		} catch (Exception e) {
-			logger.info("testDeleteAccount - after with exception:" + e);
-		}
+            service.deleteAccount(1);
+            Assertions.fail();
+        } catch (Exception e) {
+            logger.info("testDeleteAccount - after with exception:" + e);
+        }
     }
 
 }

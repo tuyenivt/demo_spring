@@ -1,18 +1,27 @@
 package com.coloza.sample.spring.xml;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.coloza.sample.spring.Coach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class DefaultCoachTest extends BaseXmlTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class DefaultCoachTest {
 
+    private ClassPathXmlApplicationContext context;
     private Coach coach;
 
-    @Before
+    @BeforeAll
     public void setup() {
-        super.setup();
+        context = new ClassPathXmlApplicationContext("applicationContext.xml");
         coach = context.getBean("defaultCoach", Coach.class);
+    }
+
+    @AfterAll
+    public void teardown() {
+        context.close();
     }
 
     @Test
