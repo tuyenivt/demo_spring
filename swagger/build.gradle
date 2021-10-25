@@ -1,0 +1,72 @@
+plugins {
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyMngmtVersion}"
+    id 'java'
+    id 'org.hidetake.swagger.generator' version '2.18.2'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2020.0.4")
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'io.github.openfeign:feign-okhttp:10.12'
+    implementation 'io.github.openfeign:feign-jackson:10.12'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.1.11'
+    implementation 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.2'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.29'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+swaggerSources {
+    petstore {
+        inputFile = file('swagger/petstore.yaml')
+        code {
+            language = 'java'
+            configFile = file('swagger/config-petstore.json')
+        }
+    }
+}
+
+compileJava {
+    dependsOn swaggerSources.petstore.code
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${swaggerSources.petstore.code.outputDir}/src/main/java"
+        }
+        resources {
+            srcDir "${swaggerSources.petstore.code.outputDir}/src/main/resources"
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
