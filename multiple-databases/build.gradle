@@ -19,13 +19,14 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	runtimeOnly 'mysql:mysql-connector-java'
 	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 test {

@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: multiple-databases
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: true
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch_size: 100
+
+scheduled:
+  fixedRate: 10000
+
+demo:
+  datasource:
+    platform: mysql
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://localhost:3307/demo
+    username: root
+    password: root
+
+old-demo:
+  datasource:
+    platform: mysql
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://localhost:3306/demo
+    username: root
+    password: root
