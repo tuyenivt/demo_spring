@@ -1,0 +1,90 @@
+version: "3.9"
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.9
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped
+    volumes:
+      - demo-rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - demo
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    hostname: redis
+    restart: unless-stopped
+    volumes:
+      - demo-redis-data:/data
+    ports:
+      - 6379:6379
+    networks:
+      - demo
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    hostname: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - demo-mongo-data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - demo
+
+  mysql5:
+    image: mysql:5.7
+    container_name: mysql5
+    hostname: mysql5
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci --max-allowed-packet=1g
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=demo
+    volumes:
+      - demo-mysql5-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - demo
+
+  mysql8:
+    image: mysql:8.0
+    container_name: mysql8
+    hostname: mysql8
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci --max-allowed-packet=1g
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=demo
+    volumes:
+      - demo-mysql8-data:/var/lib/mysql
+    ports:
+      - 3307:3306
+    networks:
+      - demo
+
+volumes:
+  demo-rabbitmq-data:
+    driver: local
+  demo-redis-data:
+    driver: local
+  demo-mongo-data:
+    driver: local
+  demo-mysql5-data:
+    driver: local
+  demo-mysql8-data:
+    driver: local
+
+networks:
+  demo:
+    driver: bridge
