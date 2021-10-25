@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: swagger
+
+app:
+  pet-store:
+    base-url: https://petstore.swagger.io/v2
+    user-name: user
+    password: pass

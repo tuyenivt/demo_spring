@@ -1,0 +1,13 @@
+{
+  "library": "feign",
+  "java8": true,
+  "dateLibrary": "java8-localdatetime",
+  "sortParamsByRequiredFlag": false,
+  "useGzipFeature": true,
+  "useRuntimeException": true,
+  "checkDuplicatedModelName": true,
+  "hideGenerationTimestamp": true,
+  "modelPackage": "io.swagger.petstore.model",
+  "apiPackage": "io.swagger.petstore.api",
+  "invokerPackage": "io.swagger.petstore.invoker"
+}
