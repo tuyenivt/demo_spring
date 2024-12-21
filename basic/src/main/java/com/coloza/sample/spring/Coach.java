@@ -2,8 +2,8 @@ package com.coloza.sample.spring;
 
 public interface Coach {
 
-    public String getDailyWorkout();
+    String getDailyWorkout();
 
-    public String getDailyFortune();
+    String getDailyFortune();
 
 }
