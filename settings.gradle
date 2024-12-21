@@ -1,4 +1,5 @@
 rootProject.name = 'demo-spring'
+include 'ai'
 include 'aop'
 include 'basic'
 include 'caching'
