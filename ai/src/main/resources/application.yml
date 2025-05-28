@@ -2,6 +2,20 @@ spring:
   application:
     name: ai
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      model: ${OPENAI_MODEL}
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      init:
+        pull-model-strategy: always
+        timeout: 60s
+        max-retries: 1
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:llama3.1}
+          temperature: 0.7
+    vectorstore:
+      qdrant:
+        host: ${QDRANT_HOST:localhost}
+        port: ${QDRANT_PORT:6334}
+        collection-name: telehealth_docs
+        use-tls: false
+        initialize-schema: true

@@ -1,0 +1,17 @@
+# Registration
+To register for HealthConnect, visit our registration page and enter your personal details. You must verify your email to activate the account.
+
+# Declaring Symptoms
+Users can declare symptoms using the "Describe Your Condition" section. This helps doctors prepare for your consultation.
+
+# Choosing a Doctor
+You can search for doctors by specialty, availability, and user ratings before booking an appointment.
+
+# Booking Appointments
+Appointments can be scheduled through the calendar interface. Confirm your preferred time and doctor to complete the booking.
+
+# Payment
+HealthConnect supports credit cards, insurance billing, and digital wallets. Payment must be completed before joining a consultation.
+
+# Joining a Consultation
+Join virtual consultations through the "My Appointments" tab by clicking the "Join Meeting" button at the scheduled time.

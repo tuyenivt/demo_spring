@@ -1,0 +1,14 @@
+# Accepted Insurance
+HealthConnect supports major providers including AIA, Great Eastern, Prudential, Manulife, and NTUC Income, and regional insurers.
+
+# Eligibility
+Enter your policy number or upload a photo of your insurance card during registration to verify eligibility.
+
+# Claims
+Claims are submitted automatically if your provider is in-network. For out-of-network, downloadable forms are available.
+
+# Privacy Policy
+Your data is encrypted and compliant with HIPAA and GDPR standards. Full policy available at /privacy.
+
+# Billing
+If insurance is not applicable, billing is handled via the HealthConnect portal. Receipts are emailed after every session.
