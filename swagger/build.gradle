@@ -30,12 +30,12 @@ dependencies {
     implementation 'io.github.openfeign:feign-core:10.12'
     implementation 'io.github.openfeign:feign-okhttp:10.12'
     implementation 'io.github.openfeign:feign-jackson:10.12'
-    implementation 'io.swagger.core.v3:swagger-annotations:2.2.26'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.40'
     implementation 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.64'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.75'
 }
 
 dependencyManagement {
@@ -56,6 +56,10 @@ swaggerSources {
 
 compileJava {
     dependsOn swaggerSources.petstore.code
+}
+
+tasks.named("processResources") {
+    dependsOn(tasks.named("generateSwaggerCodePetstore"))
 }
 
 sourceSets {
