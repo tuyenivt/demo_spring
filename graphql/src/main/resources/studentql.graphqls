@@ -1,0 +1,23 @@
+type Student {
+    id: ID!
+    name: String!
+    address: String
+    dateOfBirth: String
+}
+
+type Vehicle {
+    id: ID!
+    type: String!
+    student: Student
+}
+
+type Query {
+    students(limit: Int):[Student]
+    student(id: ID):Student
+    vehicles(limit: Int):[Vehicle]
+}
+
+type Mutation {
+    createStudent(name: String!, address: String, dateOfBirth: String):Student
+    createVehicle(type: String!, studentId: Int):Vehicle
+}
