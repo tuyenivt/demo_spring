@@ -10,3 +10,9 @@ spring:
     password:
     timeout: 60000
     ssl: false
+    lettuce:
+      pool:
+        max-active: 5
+        max-idle: 5
+        min-idle: 0
+        max-wait: 2s
