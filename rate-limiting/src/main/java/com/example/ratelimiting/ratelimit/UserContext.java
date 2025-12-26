@@ -20,4 +20,12 @@ public class UserContext {
         }
         return userId;
     }
+
+//    public String getUserIdFromSecurityContext() {
+//        var authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication != null && authentication instanceof UserDetails userDetails) {
+//            return userDetails.getUsername();
+//        }
+//        throw new IllegalStateException("Unrecognized User Identifier");
+//    }
 }

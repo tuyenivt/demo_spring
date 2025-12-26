@@ -1,6 +1,5 @@
 package com.example.ratelimiting.ratelimit;
 
-import com.example.ratelimiting.service.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,10 +18,8 @@ public class RateLimitAspect {
 
     @Before("@annotation(rateLimit)")
     public void rateLimit(JoinPoint jp, RateLimit rateLimit) {
-        var userId = userContext.getUserId();
-        var key = String.join(":", "rate-limit", "user", userId, jp.getSignature().toShortString());
-        var bucket = rateLimitService.resolveBucket(key, rateLimit.limit(), rateLimit.durationSeconds());
-        if (!bucket.tryConsume(1)) {
+        var key = String.join(":", "rate-limit", "user", userContext.getUserId(), jp.getSignature().toShortString());
+        if (!rateLimitService.tryConsume(key, rateLimit.limit(), rateLimit.durationSeconds())) {
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
         }
     }
