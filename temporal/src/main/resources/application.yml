@@ -1,3 +1,7 @@
 spring:
   application:
     name: temporal
+temporal:
+  namespace: default
+  task-queue: ORDER_PROCESSING_QUEUE
+  target: localhost:7233
