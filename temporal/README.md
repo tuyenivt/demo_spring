@@ -2,7 +2,7 @@
 
 ## Overview
 
-- A temporal Java demo project.
+- A temporal Java demo project with graceful shutdown support.
 
 ## Architecture Overview
 

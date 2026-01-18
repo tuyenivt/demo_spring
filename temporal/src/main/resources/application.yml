@@ -1,8 +1,36 @@
 spring:
   application:
     name: temporal
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
 temporal:
   namespace: default
   task-queue: ORDER_PROCESSING_QUEUE
   target: localhost:7233
   ui: http://localhost:8233
+  worker:
+    shutdown-timeout-seconds: 30

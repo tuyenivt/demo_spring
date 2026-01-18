@@ -15,4 +15,6 @@ public class TemporalProperties {
     private String target;
     @Value("${temporal.ui}")
     private String ui;
+    @Value("${temporal.worker.shutdown-timeout-seconds:30}")
+    private int shutdownTimeoutSeconds;
 }
