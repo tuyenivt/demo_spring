@@ -5,3 +5,4 @@ temporal:
   namespace: default
   task-queue: ORDER_PROCESSING_QUEUE
   target: localhost:7233
+  ui: http://localhost:8233

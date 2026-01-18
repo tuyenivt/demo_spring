@@ -13,4 +13,6 @@ public class TemporalProperties {
     private String taskQueue;
     @Value("${temporal.target}")
     private String target;
+    @Value("${temporal.ui}")
+    private String ui;
 }
