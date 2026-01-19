@@ -17,7 +17,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
+        ddl-auto: none
         jdbc:
           batch_size: 20
         order_inserts: true
