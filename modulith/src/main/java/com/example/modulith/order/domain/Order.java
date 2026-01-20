@@ -12,7 +12,7 @@ import java.time.Instant;
 @Table(name = "orders")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-class Order {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

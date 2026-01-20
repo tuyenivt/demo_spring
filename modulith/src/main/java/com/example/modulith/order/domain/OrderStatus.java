@@ -1,6 +1,6 @@
 package com.example.modulith.order.domain;
 
-enum OrderStatus {
+public enum OrderStatus {
     PENDING,
     CONFIRMED,
     CANCELLED,
