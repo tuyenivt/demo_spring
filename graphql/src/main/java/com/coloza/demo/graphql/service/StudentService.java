@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +31,6 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public List<Student> findAll(int limit) {
-        return this.repository.findAll().stream().limit(limit).collect(Collectors.toList());
+        return this.repository.findAll().stream().limit(limit).toList();
     }
 }

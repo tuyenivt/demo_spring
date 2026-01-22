@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +26,6 @@ public class VehicleService {
 
     @Transactional(readOnly = true)
     public List<Vehicle> findAll(int limit) {
-        return this.vehicleRepository.findAll().stream().limit(limit).collect(Collectors.toList());
+        return this.vehicleRepository.findAll().stream().limit(limit).toList();
     }
 }
