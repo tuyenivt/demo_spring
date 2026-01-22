@@ -8,50 +8,61 @@
 
 ## Testing query
 
-<p>Open browser and access to <code>http://localhost:8080/graphql</code></p>
-<p>Create new data:</p>
-<pre>
+Open browser and access to `http://localhost:8080/graphiql`
+
+### Create data
+
+```graphql
 mutation {
-  createStudent(name: "NAME_1", address: "ADDRESS_1", dateOfBirth: "2000-01-01") {
-    id
-  }
-}
-mutation {
-  createVehicle(type: "VEHICLE_1", studentId: 1) {
-    id
-  }
-}
-</pre>
-<p>Query data:</p>
-<pre>
-{
-  students(limit: 10) {
-    id
-    name
-    address
-    dateOfBirth
-  }
-}
-{
-  vehicles(limit: 10) {
-    id
-    type
-    student {
-      id
-      name
-      address
-      dateOfBirth
+    createStudent(input: { name: "NAME_1", address: "ADDRESS_1", dateOfBirth: "2000-01-01" }) {
+        id
     }
-  }
 }
-</pre>
-<pre>
+```
+
+```graphql
+mutation {
+    createVehicle(input: { type: "VEHICLE_1", studentId: "81dc2069-3146-42b8-b86e-71812d25e9f2" }) {
+        id
+    }
+}
+```
+
+### Query data
+
+```graphql
 {
-  student(id: 1) {
-    id
-    name
-    address
-    dateOfBirth
-  }
+    students(limit: 10) {
+        id
+        name
+        address
+        dateOfBirth
+    }
 }
-</pre>
+```
+
+```graphql
+{
+    student(id: "81dc2069-3146-42b8-b86e-71812d25e9f2") {
+        id
+        name
+        address
+        dateOfBirth
+    }
+}
+```
+
+```graphql
+{
+    vehicles(limit: 10) {
+        id
+        type
+        student {
+            id
+            name
+            address
+            dateOfBirth
+        }
+    }
+}
+```
