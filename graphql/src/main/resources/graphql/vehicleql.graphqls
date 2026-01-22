@@ -1,0 +1,20 @@
+type Vehicle {
+    id: UUID!
+    type: String!
+    student: Student
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+extend type Query {
+    vehicles(limit: Int):[Vehicle]
+}
+
+extend type Mutation {
+    createVehicle(input: CreateVehicleInput!):Vehicle!
+}
+
+input CreateVehicleInput {
+    type: String!
+    studentId: UUID
+}

@@ -1,23 +1,23 @@
 type Student {
-    id: ID!
+    id: UUID!
     name: String!
     address: String
     dateOfBirth: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 
-type Vehicle {
-    id: ID!
-    type: String!
-    student: Student
-}
-
-type Query {
+extend type Query {
     students(limit: Int):[Student]
-    student(id: ID):Student
-    vehicles(limit: Int):[Vehicle]
+    student(id: UUID):Student
 }
 
-type Mutation {
-    createStudent(name: String!, address: String, dateOfBirth: String):Student
-    createVehicle(type: String!, studentId: Int):Vehicle
+extend type Mutation {
+    createStudent(input: CreateStudentInput!):Student!
+}
+
+input CreateStudentInput {
+    name: String!
+    address: String
+    dateOfBirth: String
 }

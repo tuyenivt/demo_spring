@@ -1,8 +1,11 @@
 package com.coloza.demo.graphql.controller;
 
-import com.coloza.demo.graphql.model.entity.Student;
+import com.coloza.demo.graphql.entity.Student;
+import com.coloza.demo.graphql.dto.CreateStudentInput;
 import com.coloza.demo.graphql.service.StudentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -17,17 +20,17 @@ public class StudentController {
     private final StudentService service;
 
     @QueryMapping
-    public Optional<Student> getStudent(int id) {
+    public Optional<Student> student(@Argument String id) {
         return this.service.findById(id);
     }
 
     @QueryMapping
-    public List<Student> getStudents(int limit) {
+    public List<Student> students(@Argument Integer limit) {
         return this.service.findAll(limit);
     }
 
     @MutationMapping
-    public Student createStudent(String name, String address, String dateOfBirth) {
-        return this.service.create(name, address, dateOfBirth);
+    public Student createStudent(@Argument @Valid CreateStudentInput input) {
+        return this.service.create(input);
     }
 }

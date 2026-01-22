@@ -1,22 +1,21 @@
-package com.coloza.demo.graphql.model.entity;
+package com.coloza.demo.graphql.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
-@EqualsAndHashCode
 @Entity
-public class Student {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    private int id;
-
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Student extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
