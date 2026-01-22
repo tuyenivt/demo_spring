@@ -1,1 +1,9 @@
+server:
+  port: 8080
 
+spring:
+  application:
+    name: graphql
+  threads:
+    virtual:
+      enabled: true
