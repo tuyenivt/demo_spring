@@ -18,13 +18,25 @@ public class VehicleService {
 
     @Transactional
     public Vehicle create(CreateVehicleInput input) {
-        var vehicle = new Vehicle();
-        vehicle.setType(input.type());
+        var vehicle = Vehicle.builder().type(input.type()).build();
         if (input.studentId() != null) {
             var student = studentRepository.findById(input.studentId());
             student.ifPresent(vehicle::setStudent);
         }
         return this.vehicleRepository.save(vehicle);
+    }
+
+    @Transactional
+    public List<Vehicle> createAll(List<CreateVehicleInput> inputs) {
+        var vehicles = inputs.stream().map(input -> {
+            var vehicle = Vehicle.builder().type(input.type()).build();
+            if (input.studentId() != null) {
+                var student = studentRepository.findById(input.studentId());
+                student.ifPresent(vehicle::setStudent);
+            }
+            return vehicle;
+        }).toList();
+        return this.vehicleRepository.saveAll(vehicles);
     }
 
     @Transactional(readOnly = true)

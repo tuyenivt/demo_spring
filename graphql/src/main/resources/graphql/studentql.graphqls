@@ -14,6 +14,7 @@ extend type Query {
 
 extend type Mutation {
     createStudent(input: CreateStudentInput!):Student!
+    createStudents(inputs: [CreateStudentInput!]!):[Student!]!
 }
 
 input CreateStudentInput {

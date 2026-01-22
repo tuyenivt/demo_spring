@@ -19,13 +19,23 @@ public class StudentService {
 
     @Transactional
     public Student create(CreateStudentInput input) {
-        var student = new Student();
-        student.setName(input.name());
-        student.setAddress(input.address());
+        var student = Student.builder().name(input.name()).address(input.address()).build();
         if (input.dateOfBirth() != null) {
             student.setDateOfBirth(LocalDate.parse(input.dateOfBirth()));
         }
         return this.repository.save(student);
+    }
+
+    @Transactional
+    public List<Student> createAll(List<CreateStudentInput> inputs) {
+        var students = inputs.stream().map(input -> {
+            var student = Student.builder().name(input.name()).address(input.address()).build();
+            if (input.dateOfBirth() != null) {
+                student.setDateOfBirth(LocalDate.parse(input.dateOfBirth()));
+            }
+            return student;
+        }).toList();
+        return this.repository.saveAll(students);
     }
 
     @Transactional(readOnly = true)

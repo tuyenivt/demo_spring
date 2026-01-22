@@ -12,6 +12,7 @@ extend type Query {
 
 extend type Mutation {
     createVehicle(input: CreateVehicleInput!):Vehicle!
+    createVehicles(inputs: [CreateVehicleInput!]!):[Vehicle!]!
 }
 
 input CreateVehicleInput {

@@ -27,4 +27,9 @@ public class VehicleController {
     public Vehicle createVehicle(@Argument @Valid CreateVehicleInput input) {
         return this.service.create(input);
     }
+
+    @MutationMapping
+    public List<Vehicle> createVehicles(@Argument @Valid List<CreateVehicleInput> inputs) {
+        return this.service.createAll(inputs);
+    }
 }

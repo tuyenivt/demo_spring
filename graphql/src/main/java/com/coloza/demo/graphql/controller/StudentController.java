@@ -33,4 +33,9 @@ public class StudentController {
     public Student createStudent(@Argument @Valid CreateStudentInput input) {
         return this.service.create(input);
     }
+
+    @MutationMapping
+    public List<Student> createStudents(@Argument @Valid List<CreateStudentInput> inputs) {
+        return this.service.createAll(inputs);
+    }
 }
