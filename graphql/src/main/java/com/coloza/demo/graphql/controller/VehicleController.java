@@ -1,7 +1,9 @@
 package com.coloza.demo.graphql.controller;
 
-import com.coloza.demo.graphql.entity.Vehicle;
 import com.coloza.demo.graphql.dto.CreateVehicleInput;
+import com.coloza.demo.graphql.dto.UpdateVehicleInput;
+import com.coloza.demo.graphql.dto.UpsertVehicleInput;
+import com.coloza.demo.graphql.entity.Vehicle;
 import com.coloza.demo.graphql.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,5 +34,15 @@ public class VehicleController {
     @MutationMapping
     public List<Vehicle> createVehicles(@Argument @Valid List<CreateVehicleInput> inputs) {
         return this.service.createAll(inputs);
+    }
+
+    @MutationMapping
+    public Optional<Vehicle> updateVehicle(@Argument @Valid UpdateVehicleInput input) {
+        return this.service.update(input);
+    }
+
+    @MutationMapping
+    public Vehicle upsertVehicle(@Argument @Valid UpsertVehicleInput input) {
+        return this.service.upsert(input);
     }
 }

@@ -1,7 +1,9 @@
 package com.coloza.demo.graphql.controller;
 
-import com.coloza.demo.graphql.entity.Student;
 import com.coloza.demo.graphql.dto.CreateStudentInput;
+import com.coloza.demo.graphql.dto.UpdateStudentInput;
+import com.coloza.demo.graphql.dto.UpsertStudentInput;
+import com.coloza.demo.graphql.entity.Student;
 import com.coloza.demo.graphql.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +39,15 @@ public class StudentController {
     @MutationMapping
     public List<Student> createStudents(@Argument @Valid List<CreateStudentInput> inputs) {
         return this.service.createAll(inputs);
+    }
+
+    @MutationMapping
+    public Optional<Student> updateStudent(@Argument @Valid UpdateStudentInput input) {
+        return this.service.update(input);
+    }
+
+    @MutationMapping
+    public Student upsertStudent(@Argument @Valid UpsertStudentInput input) {
+        return this.service.upsert(input);
     }
 }

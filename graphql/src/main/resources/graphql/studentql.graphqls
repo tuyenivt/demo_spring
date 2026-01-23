@@ -15,9 +15,25 @@ extend type Query {
 extend type Mutation {
     createStudent(input: CreateStudentInput!):Student!
     createStudents(inputs: [CreateStudentInput!]!):[Student!]!
+    updateStudent(input: UpdateStudentInput!):Student
+    upsertStudent(input: UpsertStudentInput!):Student!
 }
 
 input CreateStudentInput {
+    name: String!
+    address: String
+    dateOfBirth: String
+}
+
+input UpdateStudentInput {
+    id: UUID!
+    name: String
+    address: String
+    dateOfBirth: String
+}
+
+input UpsertStudentInput {
+    id: UUID
     name: String!
     address: String
     dateOfBirth: String

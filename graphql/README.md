@@ -54,6 +54,77 @@ mutation {
 }
 ```
 
+### Partial update (patch-like behavior)
+
+Only provided fields will be updated. Returns null if entity not found.
+
+```graphql
+mutation {
+    updateStudent(input: {
+        id: "81dc2069-3146-42b8-b86e-71812d25e9f2",
+        name: "UPDATED_NAME"
+    }) {
+        id
+        name
+        address
+        dateOfBirth
+    }
+}
+```
+
+```graphql
+mutation {
+    updateVehicle(input: {
+        id: "81dc2069-3146-42b8-b86e-71812d25e9f2",
+        type: "UPDATED_TYPE"
+    }) {
+        id
+        type
+        student {
+            id
+            name
+        }
+    }
+}
+```
+
+### Upsert (create or update)
+
+Creates a new entity if id is null or not found. Updates existing entity if found.
+
+```graphql
+mutation {
+    upsertStudent(input: {
+        id: "81dc2069-3146-42b8-b86e-71812d25e9f2",
+        name: "UPSERTED_NAME",
+        address: "UPSERTED_ADDRESS",
+        dateOfBirth: "1999-12-31"
+    }) {
+        id
+        name
+        address
+        dateOfBirth
+    }
+}
+```
+
+```graphql
+mutation {
+    upsertVehicle(input: {
+        id: "81dc2069-3146-42b8-b86e-71812d25e9f2",
+        type: "UPSERTED_TYPE",
+        studentId: "ea9137ce-a66d-45cf-8ec6-9b687c2458c3"
+    }) {
+        id
+        type
+        student {
+            id
+            name
+        }
+    }
+}
+```
+
 ### Query data
 
 ```graphql

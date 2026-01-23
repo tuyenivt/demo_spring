@@ -13,9 +13,23 @@ extend type Query {
 extend type Mutation {
     createVehicle(input: CreateVehicleInput!):Vehicle!
     createVehicles(inputs: [CreateVehicleInput!]!):[Vehicle!]!
+    updateVehicle(input: UpdateVehicleInput!):Vehicle
+    upsertVehicle(input: UpsertVehicleInput!):Vehicle!
 }
 
 input CreateVehicleInput {
+    type: String!
+    studentId: UUID
+}
+
+input UpdateVehicleInput {
+    id: UUID!
+    type: String
+    studentId: UUID
+}
+
+input UpsertVehicleInput {
+    id: UUID
     type: String!
     studentId: UUID
 }
