@@ -7,12 +7,18 @@ import com.coloza.demo.graphql.dto.filter.VehicleFilter;
 import com.coloza.demo.graphql.dto.pagination.*;
 import com.coloza.demo.graphql.dto.sort.VehicleSort;
 import com.coloza.demo.graphql.entity.Vehicle;
+import com.coloza.demo.graphql.exception.ErrorCode;
+import com.coloza.demo.graphql.exception.ResourceNotFoundException;
+import com.coloza.demo.graphql.exception.TechnicalException;
 import com.coloza.demo.graphql.repository.StudentRepository;
 import com.coloza.demo.graphql.repository.VehicleRepository;
 import com.coloza.demo.graphql.specification.VehicleSpecification;
 import com.coloza.demo.graphql.util.CursorUtils;
 import com.coloza.demo.graphql.util.SortUtils;
+import com.coloza.demo.graphql.validation.VehicleValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -20,65 +26,109 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final StudentRepository studentRepository;
+    private final VehicleValidator validator;
 
     @Transactional
     public Vehicle create(CreateVehicleInput input) {
-        var vehicle = Vehicle.builder().type(input.type()).build();
+        validator.validateCreate(input);
+
         if (input.studentId() != null) {
-            var student = studentRepository.findById(input.studentId());
-            student.ifPresent(vehicle::setStudent);
+            var currentVehicleCount = vehicleRepository.countByStudentId(input.studentId());
+            validator.validateVehicleLimit(input.studentId(), currentVehicleCount);
         }
-        return this.vehicleRepository.save(vehicle);
+
+        try {
+            var vehicle = Vehicle.builder().type(input.type()).build();
+            if (input.studentId() != null) {
+                var student = studentRepository.findById(input.studentId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Student", input.studentId()));
+                vehicle.setStudent(student);
+            }
+
+            return this.vehicleRepository.save(vehicle);
+        } catch (DataAccessException e) {
+            log.error("Database error while creating vehicle", e);
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR, "Failed to create vehicle", e);
+        }
     }
 
     @Transactional
     public List<Vehicle> createAll(List<CreateVehicleInput> inputs) {
-        var vehicles = inputs.stream().map(input -> {
-            var vehicle = Vehicle.builder().type(input.type()).build();
-            if (input.studentId() != null) {
-                var student = studentRepository.findById(input.studentId());
-                student.ifPresent(vehicle::setStudent);
-            }
-            return vehicle;
-        }).toList();
-        return this.vehicleRepository.saveAll(vehicles);
+        inputs.forEach(validator::validateCreate);
+
+        try {
+            var vehicles = inputs.stream().map(input -> {
+                var vehicle = Vehicle.builder().type(input.type()).build();
+                if (input.studentId() != null) {
+                    var student = studentRepository.findById(input.studentId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Student", input.studentId()));
+                    vehicle.setStudent(student);
+                }
+                return vehicle;
+            }).toList();
+
+            return this.vehicleRepository.saveAll(vehicles);
+        } catch (DataAccessException e) {
+            log.error("Database error while bulk creating vehicles", e);
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR, "Failed to create vehicles", e);
+        }
     }
 
     @Transactional
-    public Optional<Vehicle> update(UpdateVehicleInput input) {
-        return this.vehicleRepository.findById(input.id()).map(vehicle -> {
+    public Vehicle update(UpdateVehicleInput input) {
+        validator.validateUpdate(input);
+
+        try {
+            var vehicle = this.vehicleRepository.findById(input.id())
+                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle", input.id()));
+
             if (input.type() != null) {
                 vehicle.setType(input.type());
             }
             if (input.studentId() != null) {
-                var student = studentRepository.findById(input.studentId());
-                student.ifPresent(vehicle::setStudent);
+                var student = studentRepository.findById(input.studentId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Student", input.studentId()));
+                vehicle.setStudent(student);
             }
+
             return this.vehicleRepository.save(vehicle);
-        });
+        } catch (DataAccessException e) {
+            log.error("Database error while updating vehicle: {}", input.id(), e);
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR, "Failed to update vehicle", e);
+        }
     }
 
     @Transactional
     public Vehicle upsert(UpsertVehicleInput input) {
-        Vehicle vehicle;
-        if (input.id() != null) {
-            vehicle = this.vehicleRepository.findById(input.id()).orElseGet(() -> Vehicle.builder().build());
-        } else {
-            vehicle = Vehicle.builder().build();
+        validator.validateUpsert(input);
+
+        try {
+            Vehicle vehicle;
+            if (input.id() != null) {
+                vehicle = this.vehicleRepository.findById(input.id()).orElseGet(() -> Vehicle.builder().build());
+            } else {
+                vehicle = Vehicle.builder().build();
+            }
+
+            vehicle.setType(input.type());
+            if (input.studentId() != null) {
+                var student = studentRepository.findById(input.studentId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Student", input.studentId()));
+                vehicle.setStudent(student);
+            }
+
+            return this.vehicleRepository.save(vehicle);
+        } catch (DataAccessException e) {
+            log.error("Database error while upserting vehicle", e);
+            throw new TechnicalException(ErrorCode.DATABASE_ERROR, "Failed to upsert vehicle", e);
         }
-        vehicle.setType(input.type());
-        if (input.studentId() != null) {
-            var student = studentRepository.findById(input.studentId());
-            student.ifPresent(vehicle::setStudent);
-        }
-        return this.vehicleRepository.save(vehicle);
     }
 
     @Transactional(readOnly = true)

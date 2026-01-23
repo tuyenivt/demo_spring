@@ -26,7 +26,7 @@ type VehicleV1 {
 # Version-specific queries for backward compatibility
 extend type Query {
     # V1 queries (deprecated)
-    studentV1(id: UUID): StudentV1 @deprecated(reason: "Use 'student' query instead")
+    studentV1(id: UUID): StudentV1! @deprecated(reason: "Use 'student' query instead")
     studentsV1(limit: Int): [StudentV1] @deprecated(reason: "Use 'studentsPage' query instead")
     vehiclesV1(limit: Int): [VehicleV1] @deprecated(reason: "Use 'vehiclesPage' query instead")
 }

@@ -36,9 +36,8 @@ public class VersionController {
 
     @Deprecated
     @QueryMapping
-    public Optional<StudentV1> studentV1(@Argument String id) {
-        return studentService.findById(id)
-                .map(StudentV1::from);
+    public StudentV1 studentV1(@Argument String id) {
+        return StudentV1.from(studentService.findById(id));
     }
 
     @Deprecated

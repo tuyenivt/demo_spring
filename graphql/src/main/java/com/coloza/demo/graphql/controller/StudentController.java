@@ -19,7 +19,6 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class StudentController {
     private final StudentService service;
 
     @QueryMapping
-    public Optional<Student> student(@Argument String id) {
+    public Student student(@Argument String id) {
         return this.service.findById(id);
     }
 
@@ -65,7 +64,7 @@ public class StudentController {
     }
 
     @MutationMapping
-    public Optional<Student> updateStudent(@Argument @Valid UpdateStudentInput input) {
+    public Student updateStudent(@Argument @Valid UpdateStudentInput input) {
         return this.service.update(input);
     }
 

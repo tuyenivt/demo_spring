@@ -19,7 +19,6 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -60,7 +59,7 @@ public class VehicleController {
     }
 
     @MutationMapping
-    public Optional<Vehicle> updateVehicle(@Argument @Valid UpdateVehicleInput input) {
+    public Vehicle updateVehicle(@Argument @Valid UpdateVehicleInput input) {
         return this.service.update(input);
     }
 

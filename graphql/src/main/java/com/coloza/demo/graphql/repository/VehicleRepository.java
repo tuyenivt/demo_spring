@@ -9,4 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, UUID>, JpaSpecificationExecutor<Vehicle> {
+    int countByStudentId(UUID studentId);
 }
