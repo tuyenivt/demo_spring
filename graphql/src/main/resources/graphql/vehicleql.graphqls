@@ -1,13 +1,63 @@
+enum VehicleType {
+    CAR
+    MOTORCYCLE
+    BICYCLE
+    TRUCK
+    BUS
+    VAN
+    SCOOTER
+}
+
 type Vehicle {
     id: UUID!
-    type: String!
+    type: VehicleType!
     student: Student
     createdAt: DateTime!
     updatedAt: DateTime!
 }
 
+type VehiclePageResult {
+    content: [Vehicle!]!
+    pageInfo: PageInfoDto!
+}
+
+type VehicleEdge {
+    node: Vehicle!
+    cursor: String!
+}
+
+type VehicleConnection {
+    edges: [VehicleEdge!]!
+    pageInfo: PageInfoConnection!
+    totalCount: Int!
+}
+
+input VehicleTypeFilter {
+    eq: VehicleType
+    in: [VehicleType!]
+}
+
+input VehicleFilter {
+    type: VehicleTypeFilter
+    studentId: UUIDFilter
+    createdAt: DateTimeFilter
+}
+
+enum VehicleSortField {
+    TYPE
+    CREATED_AT
+    UPDATED_AT
+}
+
+input VehicleSort {
+    field: VehicleSortField!
+    direction: SortDirection
+}
+
 extend type Query {
-    vehicles(limit: Int):[Vehicle]
+    vehicles(limit: Int):[Vehicle] @deprecated(reason: "Use 'vehiclesPage' for paginated results")
+    vehiclesPage(page: PageInput, filter: VehicleFilter, sort: VehicleSort): VehiclePageResult!
+    vehiclesConnection(connection: ConnectionInput, filter: VehicleFilter, sort: VehicleSort): VehicleConnection!
 }
 
 extend type Mutation {
@@ -18,18 +68,18 @@ extend type Mutation {
 }
 
 input CreateVehicleInput {
-    type: String!
+    type: VehicleType!
     studentId: UUID
 }
 
 input UpdateVehicleInput {
     id: UUID!
-    type: String
+    type: VehicleType
     studentId: UUID
 }
 
 input UpsertVehicleInput {
     id: UUID
-    type: String!
+    type: VehicleType!
     studentId: UUID
 }

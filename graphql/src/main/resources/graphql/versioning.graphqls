@@ -1,0 +1,43 @@
+# API Versioning Support
+# This file demonstrates schema evolution strategies for backward compatibility
+
+# V1 Types (Deprecated - for backward compatibility)
+type StudentV1 {
+    id: UUID!
+    name: String!
+    address: String
+    dateOfBirth: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type VehicleV1 {
+    id: UUID!
+    type: String!  # V1 uses String instead of enum
+    student: StudentV1
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+# V2 Types (Current version - uses enums and enhanced features)
+# Note: V2 types are the default Student and Vehicle types defined in
+# studentql.graphqls and vehicleql.graphqls
+
+# Version-specific queries for backward compatibility
+extend type Query {
+    # V1 queries (deprecated)
+    studentV1(id: UUID): StudentV1 @deprecated(reason: "Use 'student' query instead")
+    studentsV1(limit: Int): [StudentV1] @deprecated(reason: "Use 'studentsPage' query instead")
+    vehiclesV1(limit: Int): [VehicleV1] @deprecated(reason: "Use 'vehiclesPage' query instead")
+}
+
+# API Version info type
+type ApiVersion {
+    version: String!
+    deprecatedFeatures: [String!]!
+    supportedUntil: String
+}
+
+extend type Query {
+    apiVersion: ApiVersion!
+}

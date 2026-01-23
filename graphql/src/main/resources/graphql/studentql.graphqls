@@ -7,9 +7,46 @@ type Student {
     updatedAt: DateTime!
 }
 
+type StudentPageResult {
+    content: [Student!]!
+    pageInfo: PageInfoDto!
+}
+
+type StudentEdge {
+    node: Student!
+    cursor: String!
+}
+
+type StudentConnection {
+    edges: [StudentEdge!]!
+    pageInfo: PageInfoConnection!
+    totalCount: Int!
+}
+
+input StudentFilter {
+    name: StringFilter
+    address: StringFilter
+    createdAt: DateTimeFilter
+}
+
+enum StudentSortField {
+    NAME
+    ADDRESS
+    DATE_OF_BIRTH
+    CREATED_AT
+    UPDATED_AT
+}
+
+input StudentSort {
+    field: StudentSortField!
+    direction: SortDirection
+}
+
 extend type Query {
-    students(limit: Int):[Student]
+    students(limit: Int):[Student] @deprecated(reason: "Use 'studentsPage' for paginated results")
     student(id: UUID):Student
+    studentsPage(page: PageInput, filter: StudentFilter, sort: StudentSort): StudentPageResult!
+    studentsConnection(connection: ConnectionInput, filter: StudentFilter, sort: StudentSort): StudentConnection!
 }
 
 extend type Mutation {

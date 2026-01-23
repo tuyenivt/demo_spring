@@ -3,6 +3,12 @@ package com.coloza.demo.graphql.controller;
 import com.coloza.demo.graphql.dto.CreateStudentInput;
 import com.coloza.demo.graphql.dto.UpdateStudentInput;
 import com.coloza.demo.graphql.dto.UpsertStudentInput;
+import com.coloza.demo.graphql.dto.filter.StudentFilter;
+import com.coloza.demo.graphql.dto.pagination.Connection;
+import com.coloza.demo.graphql.dto.pagination.ConnectionInput;
+import com.coloza.demo.graphql.dto.pagination.PageInput;
+import com.coloza.demo.graphql.dto.pagination.PageResult;
+import com.coloza.demo.graphql.dto.sort.StudentSort;
 import com.coloza.demo.graphql.entity.Student;
 import com.coloza.demo.graphql.service.StudentService;
 import jakarta.validation.Valid;
@@ -26,9 +32,26 @@ public class StudentController {
         return this.service.findById(id);
     }
 
+    @Deprecated
     @QueryMapping
     public List<Student> students(@Argument Integer limit) {
         return this.service.findAll(limit);
+    }
+
+    @QueryMapping
+    public PageResult<Student> studentsPage(
+            @Argument PageInput page,
+            @Argument StudentFilter filter,
+            @Argument StudentSort sort) {
+        return this.service.findPage(page, filter, sort);
+    }
+
+    @QueryMapping
+    public Connection<Student> studentsConnection(
+            @Argument ConnectionInput connection,
+            @Argument StudentFilter filter,
+            @Argument StudentSort sort) {
+        return this.service.findConnection(connection, filter, sort);
     }
 
     @MutationMapping

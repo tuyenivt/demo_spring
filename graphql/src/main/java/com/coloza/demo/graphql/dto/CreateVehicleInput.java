@@ -1,11 +1,12 @@
 package com.coloza.demo.graphql.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.coloza.demo.graphql.enums.VehicleType;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
 public record CreateVehicleInput(
-        @NotBlank String type,
+        @NotNull VehicleType type,
         UUID studentId
 ) {
 }

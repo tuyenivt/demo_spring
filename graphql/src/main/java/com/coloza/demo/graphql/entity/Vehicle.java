@@ -1,9 +1,7 @@
 package com.coloza.demo.graphql.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.coloza.demo.graphql.enums.VehicleType;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -13,8 +11,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle extends BaseEntity {
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private String type;
+    private VehicleType type;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

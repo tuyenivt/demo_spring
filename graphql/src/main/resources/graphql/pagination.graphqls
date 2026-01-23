@@ -1,0 +1,65 @@
+# Shared pagination types
+
+# Offset-based pagination input
+input PageInput {
+    page: Int
+    size: Int
+}
+
+# Page info for offset-based pagination
+type PageInfoDto {
+    totalElements: Int!
+    totalPages: Int!
+    currentPage: Int!
+    pageSize: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# Cursor-based pagination input (Relay Connection pattern)
+input ConnectionInput {
+    first: Int
+    after: String
+    last: Int
+    before: String
+}
+
+# Page info for cursor-based pagination
+type PageInfoConnection {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+}
+
+input StringFilter {
+    eq: String
+    contains: String
+    startsWith: String
+    endsWith: String
+    in: [String!]
+}
+
+input DateTimeRange {
+    start: DateTime!
+    end: DateTime!
+}
+
+input DateTimeFilter {
+    eq: DateTime
+    gt: DateTime
+    gte: DateTime
+    lt: DateTime
+    lte: DateTime
+    between: DateTimeRange
+}
+
+input UUIDFilter {
+    eq: UUID
+    in: [UUID!]
+}
+
+enum SortDirection {
+    ASC
+    DESC
+}

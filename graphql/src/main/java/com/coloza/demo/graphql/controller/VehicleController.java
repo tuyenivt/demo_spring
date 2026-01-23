@@ -3,6 +3,12 @@ package com.coloza.demo.graphql.controller;
 import com.coloza.demo.graphql.dto.CreateVehicleInput;
 import com.coloza.demo.graphql.dto.UpdateVehicleInput;
 import com.coloza.demo.graphql.dto.UpsertVehicleInput;
+import com.coloza.demo.graphql.dto.filter.VehicleFilter;
+import com.coloza.demo.graphql.dto.pagination.Connection;
+import com.coloza.demo.graphql.dto.pagination.ConnectionInput;
+import com.coloza.demo.graphql.dto.pagination.PageInput;
+import com.coloza.demo.graphql.dto.pagination.PageResult;
+import com.coloza.demo.graphql.dto.sort.VehicleSort;
 import com.coloza.demo.graphql.entity.Vehicle;
 import com.coloza.demo.graphql.service.VehicleService;
 import jakarta.validation.Valid;
@@ -21,9 +27,26 @@ public class VehicleController {
 
     private final VehicleService service;
 
+    @Deprecated
     @QueryMapping
     public List<Vehicle> vehicles(@Argument Integer limit) {
         return this.service.findAll(limit);
+    }
+
+    @QueryMapping
+    public PageResult<Vehicle> vehiclesPage(
+            @Argument PageInput page,
+            @Argument VehicleFilter filter,
+            @Argument VehicleSort sort) {
+        return this.service.findPage(page, filter, sort);
+    }
+
+    @QueryMapping
+    public Connection<Vehicle> vehiclesConnection(
+            @Argument ConnectionInput connection,
+            @Argument VehicleFilter filter,
+            @Argument VehicleSort sort) {
+        return this.service.findConnection(connection, filter, sort);
     }
 
     @MutationMapping
