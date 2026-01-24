@@ -1,8 +1,8 @@
 package com.coloza.sample.rabbitmq;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CountDownLatch;
 
 @Component
 public class Receiver {
