@@ -1,4 +1,4 @@
-package com.example.kafkastreams;
+package com.coloza.sample.kafka;
 
 public class FavouriteColourStreamsAppRunner {
 

@@ -1,4 +1,4 @@
-package com.example.kafkastreams;
+package com.coloza.sample.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

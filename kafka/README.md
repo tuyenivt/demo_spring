@@ -1,4 +1,4 @@
-# Demo Kafka Streams
+# Demo Kafka
 
 ### WordCount Demo
 <p><strong>Create 2 topics:</strong></p>
