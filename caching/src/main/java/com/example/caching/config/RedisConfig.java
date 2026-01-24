@@ -1,6 +1,6 @@
-package com.example.redis.config;
+package com.example.caching.config;
 
-import com.example.redis.listener.RedisSubscriber;
+import com.example.caching.listener.RedisSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

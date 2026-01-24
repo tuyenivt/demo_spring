@@ -1,4 +1,4 @@
-package com.example.redis.sender;
+package com.example.caching.sender;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
