@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: websocket
+  threads:
+    virtual:
+      enabled: true
