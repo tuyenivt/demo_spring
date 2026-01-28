@@ -7,3 +7,14 @@ spring:
   threads:
     virtual:
       enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+logging:
+  level:
+    com.example.websocket: INFO
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG

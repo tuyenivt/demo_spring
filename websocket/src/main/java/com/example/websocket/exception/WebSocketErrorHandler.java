@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.time.Instant;
 
+import static com.example.websocket.constant.WebSocketDestinations.QUEUE_ERRORS;
+
 /**
  * Global exception handler for WebSocket messages.
  * <p>
@@ -25,7 +27,7 @@ public class WebSocketErrorHandler {
      * Uses /queue/errors destination for point-to-point error delivery
      */
     @MessageExceptionHandler
-    @SendToUser("/queue/errors")
+    @SendToUser(QUEUE_ERRORS)
     public ErrorResponse handleException(Exception exception) {
         log.error("Error processing WebSocket message", exception);
 
@@ -37,7 +39,7 @@ public class WebSocketErrorHandler {
      * Handle illegal argument exceptions (validation failures).
      */
     @MessageExceptionHandler(IllegalArgumentException.class)
-    @SendToUser("/queue/errors")
+    @SendToUser(QUEUE_ERRORS)
     public ErrorResponse handleIllegalArgument(IllegalArgumentException exception) {
         log.warn("Validation error: {}", exception.getMessage());
 
