@@ -34,6 +34,7 @@ public final class WebSocketDestinations {
 
     // System sender name
     public static final String SYSTEM_SENDER = "System";
+    public static final String UNKNOWN_SENDER = "Unknown";
 
     // Message types
     public static final String MESSAGE_TYPE_BROADCAST = "broadcast";
@@ -43,5 +44,6 @@ public final class WebSocketDestinations {
     // System messages
     public static final String MSG_WELCOME_NOTIFICATION = "Welcome! You are now subscribed to notifications.";
     public static final String MSG_NEW_MESSAGE_FROM = "New message from %s";
+    public static final String MSG_USER_JOINED_THE_CHAT = "User '%s' joined the chat";
     public static final String MSG_PRIVATE_REPLY_PREFIX = "Private reply: ";
 }

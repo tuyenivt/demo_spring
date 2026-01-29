@@ -65,4 +65,14 @@ public class MessageBroadcastHandler {
         log.info("Sending notification to {}", TOPIC_NOTIFICATIONS);
         messagingTemplate.convertAndSend(TOPIC_NOTIFICATIONS, notification);
     }
+
+    /**
+     * Broadcast system-wide notification (can be called externally).
+     */
+    public void broadcastSystemNotification(String message) {
+        var notification = new ChatResponse(SYSTEM_SENDER, message, Instant.now(), MESSAGE_TYPE_NOTIFICATION);
+
+        log.info("Broadcasting system notification: {}", message);
+        messagingTemplate.convertAndSend(TOPIC_NOTIFICATIONS, notification);
+    }
 }

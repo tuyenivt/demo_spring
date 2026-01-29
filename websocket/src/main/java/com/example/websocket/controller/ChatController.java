@@ -42,6 +42,9 @@ public class ChatController {
         // Defensive validation
         validateChatMessage(message);
 
+        // Store username in session for connect/disconnect events
+        storeUsernameInSession(message.username(), headerAccessor);
+
         // Extract session ID for logging/tracking
         var sessionId = headerAccessor.getSessionId();
         log.debug("Session ID: {}", sessionId);
@@ -60,10 +63,13 @@ public class ChatController {
      */
     @MessageMapping(SEND_PRIVATE_MESSAGE)
     @SendToUser(QUEUE_REPLY)
-    public ChatResponse handlePrivateMessage(@Payload ChatMessage message) {
+    public ChatResponse handlePrivateMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
         log.info("Received private message from: {}", message.username());
 
         validateChatMessage(message);
+
+        // Store username in session
+        storeUsernameInSession(message.username(), headerAccessor);
 
         // Echo back to sender with confirmation
         return broadcastHandler.createPrivateResponse(message);
@@ -82,6 +88,27 @@ public class ChatController {
 
         // Return immediate response to subscriber only
         return broadcastHandler.createWelcomeNotification();
+    }
+
+    /**
+     * Store username in WebSocket session attributes.
+     * <p>
+     * This allows us to identify users during connect/disconnect events.
+     */
+    private void storeUsernameInSession(String username, SimpMessageHeaderAccessor headerAccessor) {
+        if (headerAccessor.getSessionAttributes() != null) {
+            var existingUsername = (String) headerAccessor.getSessionAttributes().get("username");
+
+            // Only store if not already present (first message from this user)
+            if (existingUsername == null) {
+                headerAccessor.getSessionAttributes().put("username", username);
+                log.debug("Stored username '{}' in session", username);
+
+                // Broadcast join notification
+                var message = String.format(MSG_USER_JOINED_THE_CHAT, username);
+                broadcastHandler.broadcastSystemNotification(message);
+            }
+        }
     }
 
     /**
