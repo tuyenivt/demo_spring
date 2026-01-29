@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
@@ -57,22 +56,19 @@ public class ChatController {
     /**
      * Handle private messages sent to /app/chat.private
      * <p>
-     * Demonstrates point-to-point messaging.
-     *
-     * @SendToUser sends response only to the message sender.
+     * Sends message to specific user's private queue.
      */
     @MessageMapping(SEND_PRIVATE_MESSAGE)
-    @SendToUser(QUEUE_REPLY)
-    public ChatResponse handlePrivateMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
-        log.info("Received private message from: {}", message.username());
+    public void handlePrivateMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
+        log.info("Received private message from {} to {}", message.username(), message.targetUsername());
 
         validateChatMessage(message);
+        validatePrivateMessage(message);
 
-        // Store username in session
         storeUsernameInSession(message.username(), headerAccessor);
 
-        // Echo back to sender with confirmation
-        return broadcastHandler.createPrivateResponse(message);
+        // Send to target user
+        broadcastHandler.sendPrivateMessageToUser(message);
     }
 
     /**
@@ -105,7 +101,7 @@ public class ChatController {
                 log.debug("Stored username '{}' in session", username);
 
                 // Broadcast join notification
-                var message = String.format(MSG_USER_JOINED_THE_CHAT, username);
+                var message = String.format(MSG_USER_JOINED, username);
                 broadcastHandler.broadcastSystemNotification(message);
             }
         }
@@ -127,6 +123,21 @@ public class ChatController {
 
         if (message.content().length() > 1000) {
             throw new IllegalArgumentException("Message content too long (max 1000 characters)");
+        }
+    }
+
+    /**
+     * Validate private message specific requirements.
+     *
+     * @throws IllegalArgumentException if validation fails
+     */
+    private void validatePrivateMessage(ChatMessage message) {
+        if (message.targetUsername() == null || message.targetUsername().isBlank()) {
+            throw new IllegalArgumentException("Target username required for private messages");
+        }
+
+        if (message.username().equals(message.targetUsername())) {
+            throw new IllegalArgumentException("Cannot send private message to yourself");
         }
     }
 }

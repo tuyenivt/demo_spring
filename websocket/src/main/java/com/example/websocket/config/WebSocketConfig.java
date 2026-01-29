@@ -1,6 +1,7 @@
 package com.example.websocket.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -15,6 +16,7 @@ import static com.example.websocket.constant.WebSocketDestinations.*;
  * 1. Enables STOMP over WebSocket with SockJS fallback
  * 2. Configures an in-memory message broker for pub/sub
  * 3. Sets up application destination prefix for message routing
+ * 4. Registers channel interceptor for user authentication via STOMP headers
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -56,5 +58,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint(WEBSOCKET_ENDPOINT)
                 .setAllowedOriginPatterns("*") // In production, specify exact origins
                 .withSockJS(); // Enable SockJS fallback
+    }
+
+    /**
+     * Configure the inbound channel to intercept STOMP CONNECT frames.
+     * <p>
+     * This interceptor extracts username from STOMP headers and creates a Principal.
+     * More secure than query parameters - headers are not logged or stored in browser history.
+     * In production, replace with JWT token validation.
+     */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new UserAuthChannelInterceptor());
     }
 }

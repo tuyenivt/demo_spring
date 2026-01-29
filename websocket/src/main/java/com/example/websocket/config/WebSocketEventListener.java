@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import static com.example.websocket.constant.WebSocketDestinations.MSG_USER_LEFT;
 import static com.example.websocket.constant.WebSocketDestinations.UNKNOWN_SENDER;
 
 /**
@@ -61,7 +62,7 @@ public class WebSocketEventListener {
         var username = getUsernameFromSession(headerAccessor);
 
         if (username != null) {
-            var message = String.format("User '%s' left the chat", username);
+            var message = String.format(MSG_USER_LEFT, username);
             broadcastHandler.broadcastSystemNotification(message);
             log.info("User disconnected: {}", username);
         }

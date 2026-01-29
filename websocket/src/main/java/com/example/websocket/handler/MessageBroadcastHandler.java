@@ -43,10 +43,24 @@ public class MessageBroadcastHandler {
     }
 
     /**
-     * Create a private response for point-to-point messaging.
+     * Send private message to specific user.
+     * <p>
+     * Uses convertAndSendToUser to route message to user-specific queue.
+     * Spring automatically prefixes with /user/{username}
      */
-    public ChatResponse createPrivateResponse(ChatMessage message) {
-        return new ChatResponse(message.username(), MSG_PRIVATE_REPLY_PREFIX + message.content(), Instant.now(), MESSAGE_TYPE_PRIVATE);
+    public void sendPrivateMessageToUser(ChatMessage message) {
+        var response = new ChatResponse(message.username(), message.content(), Instant.now(), MESSAGE_TYPE_PRIVATE);
+
+        log.info("Sending private message from {} to {}", message.username(), message.targetUsername());
+
+        // IMPORTANT: Spring adds /user/{username} prefix automatically
+        // So QUEUE_PRIVATE should be just "/queue/private" without /user prefix
+        // Client subscribes to: /user/queue/private
+        // Server sends to: convertAndSendToUser(username, "/queue/private", msg)
+        // Actual destination becomes: /user/{username}/queue/private
+        messagingTemplate.convertAndSendToUser(message.targetUsername(), QUEUE_PRIVATE, response);
+
+        log.info("Private message sent to destination: /user/{}/queue/private", message.targetUsername());
     }
 
     /**

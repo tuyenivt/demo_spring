@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebSocket Demo - STOMP Chat</title>
-    <link rel="stylesheet" href="styles.css"/>
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 <div class="container">
@@ -21,7 +21,16 @@
         <div id="sessionInfo"></div>
     </div>
 
-    <div class="chat-area" id="chatArea"></div>
+    <div class="main-content">
+        <div class="users-panel">
+            <div class="users-header">Online Users</div>
+            <div class="user-list" id="userList">
+                <div class="info-box">Connect to see users</div>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chatArea"></div>
+    </div>
 
     <div class="input-area">
         <div class="input-group">
@@ -32,6 +41,11 @@
                     maxlength="50"
             />
         </div>
+
+        <div class="mode-indicator" id="modeIndicator">
+            Mode: <strong>Broadcast</strong> (messages go to all users)
+        </div>
+
         <div class="input-group">
             <input
                     type="text"
@@ -42,11 +56,12 @@
             />
             <button id="sendButton" disabled>Send</button>
         </div>
+
         <div class="button-group">
             <button id="connectButton">Connect</button>
             <button id="disconnectButton" disabled>Disconnect</button>
-            <button id="sendPrivateButton" class="secondary-button" disabled>
-                Send Private
+            <button id="clearChatButton" class="secondary-button">
+                Clear Chat
             </button>
         </div>
     </div>
@@ -55,6 +70,8 @@
 <!-- SockJS and STOMP libraries -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
-<script src="script.js"></script>
+
+<!-- Application script -->
+<script src="js/script.js"></script>
 </body>
 </html>

@@ -29,7 +29,7 @@ public final class WebSocketDestinations {
     public static final String TOPIC_NOTIFICATIONS = "/topic/notifications";
 
     // User-specific queue destinations
-    public static final String QUEUE_REPLY = "/queue/reply";
+    public static final String QUEUE_PRIVATE = "/queue/private";
     public static final String QUEUE_ERRORS = "/queue/errors";
 
     // System sender name
@@ -44,6 +44,6 @@ public final class WebSocketDestinations {
     // System messages
     public static final String MSG_WELCOME_NOTIFICATION = "Welcome! You are now subscribed to notifications.";
     public static final String MSG_NEW_MESSAGE_FROM = "New message from %s";
-    public static final String MSG_USER_JOINED_THE_CHAT = "User '%s' joined the chat";
-    public static final String MSG_PRIVATE_REPLY_PREFIX = "Private reply: ";
+    public static final String MSG_USER_JOINED = "User '%s' joined the chat";
+    public static final String MSG_USER_LEFT = "User '%s' left the chat";
 }

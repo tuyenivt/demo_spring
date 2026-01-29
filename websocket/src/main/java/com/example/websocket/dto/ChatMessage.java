@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public record ChatMessage(
         String username,
-        String content
+        String content,
+        String targetUsername
 ) {
     /**
      * Explicit constructor for Jackson deserialization.
@@ -20,9 +21,11 @@ public record ChatMessage(
     @JsonCreator
     public ChatMessage(
             @JsonProperty("username") String username,
-            @JsonProperty("content") String content
+            @JsonProperty("content") String content,
+            @JsonProperty("targetUsername") String targetUsername
     ) {
         this.username = username;
         this.content = content;
+        this.targetUsername = targetUsername;
     }
 }
