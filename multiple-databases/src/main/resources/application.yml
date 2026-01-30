@@ -2,9 +2,10 @@ spring:
   application:
     name: multiple-databases
   jpa:
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
+        format_sql: true
         generate_statistics: true
         order_inserts: true
         order_updates: true
@@ -21,6 +22,12 @@ demo:
     jdbcUrl: jdbc:mysql://localhost:3307/demo
     username: root
     password: root
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
 old-demo:
   datasource:
@@ -29,3 +36,9 @@ old-demo:
     jdbcUrl: jdbc:mysql://localhost:3306/demo
     username: root
     password: root
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000

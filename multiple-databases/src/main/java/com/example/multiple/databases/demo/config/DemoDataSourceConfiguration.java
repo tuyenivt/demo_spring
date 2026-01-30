@@ -6,6 +6,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -27,6 +28,7 @@ import java.util.Map;
 public class DemoDataSourceConfiguration {
 
     @Bean
+    @Primary
     @ConfigurationProperties(prefix = "demo.datasource")
     public DataSource demoDataSource() {
         return DataSourceBuilder.create().build();
