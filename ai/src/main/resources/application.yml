@@ -19,3 +19,23 @@ spring:
         collection-name: telehealth_docs
         use-tls: false
         initialize-schema: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ai
+
+resilience4j:
+  ratelimiter:
+    instances:
+      questionApi:
+        limit-for-period: 10
+        limit-refresh-period: 1m
+        timeout-duration: 0s

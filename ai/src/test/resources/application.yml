@@ -1,0 +1,23 @@
+spring:
+  ai:
+    ollama:
+      init:
+        pull-model-strategy: never
+        timeout: 5m
+        max-retries: 3
+      chat:
+        options:
+          model: llama3.2:1b
+          temperature: 0.7
+    vectorstore:
+      qdrant:
+        initialize-schema: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
