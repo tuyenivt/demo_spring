@@ -6,6 +6,11 @@ management:
   endpoint:
     health:
       show-details: always
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState, db, externalApi
   metrics:
     tags:
       application: ${spring.application.name}
@@ -13,12 +18,18 @@ management:
       percentiles[http.server.requests]: 0.5, 0.7, 0.95, 0.99
       percentiles-histogram[http.server.requests]: true
       slo[http.server.requests]: 10ms, 100ms
+  tracing:
+    sampling:
+      probability: 1.0
 
 spring:
   application:
     name: demo-spring-monitor
   datasource:
     hikari:
-      leakDetectionThreshold: 2000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      leak-detection-threshold: 2000
   jpa:
     open-in-view: false

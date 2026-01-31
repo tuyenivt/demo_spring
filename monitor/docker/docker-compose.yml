@@ -10,6 +10,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml
     ports:
       - "9090:9090"
 
@@ -21,6 +22,10 @@ services:
       - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+      - ./grafana-dashboard.json:/var/lib/grafana/dashboards/demo-spring-monitor.json
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     user: '104'
     links:
       - prometheus
