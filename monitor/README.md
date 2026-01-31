@@ -1,26 +1,77 @@
 # demo_spring_monitor
 
-## Start prometheus and grafana
+Spring Boot application demonstrating monitoring and observability using Actuator, Prometheus, and Grafana.
 
-<code>docker compose -f docker/docker-compose.yml up -d</code>
+## Quick Start
 
-## Access to Prometheus
+```bash
+# Start the application
+./gradlew :monitor:bootRun
 
-<code>http://localhost:9090/graph</code>
+# Start monitoring stack (Prometheus + Grafana)
+docker compose -f docker/docker-compose.yml up -d
+```
 
-## Access to Grafana
+## Access Points
 
-<code>http://localhost:3000</code>
+| Service     | URL                   | Credentials |
+|-------------|-----------------------|-------------|
+| Application | http://localhost:8080 | -           |
+| Prometheus  | http://localhost:9090 | -           |
+| Grafana     | http://localhost:3000 | admin/admin |
 
-<p>Default login: <code>admin/admin</code></p>
+## Features
 
-## Add Prometheus data source to Grafana
+### Custom Business Metrics
+- `customer.access` - Counter tracking customer list accesses
+- `customer.transform` - Timer measuring transform operation duration
 
-<p>In Grafana, go to <code>Configuration > Data sources</code>, click on <code>Add data source</code></p>
-<p>Select <code>Prometheus</code>, set <code>URL</code> to <code>http://prometheus:9090</code></p>
-<p>Finish with <code>Save & test</code> button</p>
+### Health Checks
+- Built-in health indicators (db, diskSpace)
+- Custom `externalApi` health indicator
+- Health groups: liveness and readiness probes
 
-## Create Grafana Dashboards
+### Alerting Rules
+Pre-configured Prometheus alerts in `docker/prometheus-alerts.yml`:
+- High response time (p95 > 1s)
+- High error rate (> 10%)
+- High memory usage (heap > 90%)
+- Database connection pool exhaustion
+- Application down
 
-<p>In Grafana, go to <code>Dashboards</code>, click on button <code>New</code> and select <code>Import</code>, under <code>Import via grafana.com</code></p>
-<p>Load <code>https://grafana.com/grafana/dashboards/11378-justai-system-monitor</code></p>
+### Grafana Dashboard
+Auto-provisioned dashboard with panels for:
+- Request rate by endpoint
+- Response time percentiles (p50, p95, p99)
+- Error rate by endpoint
+- JVM heap usage
+- HikariCP connection pool stats
+- Active threads
+- Custom metrics
+
+### Distributed Tracing
+Integrated with Micrometer Tracing (Brave) for request correlation.
+
+## API Endpoints
+
+| Endpoint                   | Description                                    |
+|----------------------------|------------------------------------------------|
+| `GET /ping`                | Health check (minimal latency)                 |
+| `GET /customers`           | List all customers (increments access counter) |
+| `GET /customers/transform` | Slow endpoint (0-5s delay) for latency testing |
+
+## Actuator Endpoints
+
+- `/actuator/health` - Health status with details
+- `/actuator/health/liveness` - Liveness probe
+- `/actuator/health/readiness` - Readiness probe
+- `/actuator/metrics` - Available metrics
+- `/actuator/prometheus` - Prometheus-formatted metrics
+
+## Load Testing
+
+```bash
+./gradlew :monitor:gatlingRun
+```
+
+Runs CustomerSimulation: ramps 5-100 users over 160 seconds.
