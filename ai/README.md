@@ -12,7 +12,7 @@ This is a demo AI-powered customer support chatbot designed to assist users with
 
 ## Start Ollama
 ```shell
-docker run -d --name ai-ollama -p 11434:11434 -v ollama:/root/.ollama ollama/ollama:0.7.1
+docker run -d --name ai-ollama -p 11434:11434 -v ollama:/root/.ollama ollama/ollama:0.14
 ```
 Environment Variable:
 - `OLLAMA_BASE_URL=http://localhost:11434`
@@ -20,7 +20,7 @@ Environment Variable:
 
 ## Start Vector DB
 ```shell
-docker run -d --name ai-qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant:v1.14.1
+docker run -d --name ai-qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant:v1.16
 ```
 Environment Variable:
 - `QDRANT_HOST=localhost`
