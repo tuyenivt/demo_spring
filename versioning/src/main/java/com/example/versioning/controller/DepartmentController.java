@@ -1,4 +1,4 @@
-package com.example.versioning;
+package com.example.versioning.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

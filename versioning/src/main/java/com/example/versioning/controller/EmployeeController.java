@@ -1,4 +1,4 @@
-package com.example.versioning;
+package com.example.versioning.controller;
 
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.web.bind.annotation.RequestMapping;

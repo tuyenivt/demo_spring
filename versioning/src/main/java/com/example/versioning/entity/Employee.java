@@ -1,12 +1,12 @@
-package com.example.versioning;
+package com.example.versioning.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.versioning.dto.EmployeeStatus;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -21,6 +21,11 @@ public class Employee {
     @NotNull
     public String department;
 
+    public LocalDate hireDate;
+
+    @Enumerated(EnumType.STRING)
+    public EmployeeStatus status;
+
     protected Employee() {
     }
 
@@ -28,5 +33,7 @@ public class Employee {
         this.name = name;
         this.title = title;
         this.department = department;
+        this.hireDate = LocalDate.now();
+        this.status = EmployeeStatus.ACTIVE;
     }
 }
