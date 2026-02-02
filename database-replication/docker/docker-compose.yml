@@ -1,0 +1,31 @@
+services:
+  mysql-source:
+    image: mysql:8.4
+    container_name: mysql-writer
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: demo_db
+    volumes:
+      - mysql-source-data:/var/lib/mysql
+      - ./init-source.sql:/docker-entrypoint-initdb.d/init-source.sql
+    command: --server-id=1 --log-bin=mysql-bin --gtid-mode=ON --enforce-gtid-consistency=ON --mysql-native-password=ON --binlog-format=ROW
+
+  mysql-replica:
+    image: mysql:8.4
+    container_name: mysql-reader
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-replica-data:/var/lib/mysql
+      - ./init-replica.sql:/docker-entrypoint-initdb.d/init-replica.sql
+    depends_on:
+      - mysql-source
+    command: --server-id=2 --log-bin=mysql-bin --gtid-mode=ON --enforce-gtid-consistency=ON  --mysql-native-password=ON --relay-log=mysql-relay-bin --read-only=1
+
+volumes:
+  mysql-source-data:
+  mysql-replica-data:
