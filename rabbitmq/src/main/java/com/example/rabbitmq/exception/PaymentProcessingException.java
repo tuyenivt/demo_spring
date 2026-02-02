@@ -1,4 +1,4 @@
-package com.coloza.sample.rabbitmq.exception;
+package com.example.rabbitmq.exception;
 
 public class PaymentProcessingException extends Exception {
     public PaymentProcessingException(String message) {

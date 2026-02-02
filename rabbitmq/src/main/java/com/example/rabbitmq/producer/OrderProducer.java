@@ -1,7 +1,7 @@
-package com.coloza.sample.rabbitmq.producer;
+package com.example.rabbitmq.producer;
 
-import com.coloza.sample.rabbitmq.config.RabbitMQConfig;
-import com.coloza.sample.rabbitmq.dto.Order;
+import com.example.rabbitmq.config.RabbitMQConfig;
+import com.example.rabbitmq.dto.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

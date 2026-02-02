@@ -1,4 +1,4 @@
-package com.coloza.sample.rabbitmq.dto;
+package com.example.rabbitmq.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.coloza.sample.rabbitmq;
+package com.example.rabbitmq;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

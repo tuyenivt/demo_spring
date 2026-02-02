@@ -1,7 +1,7 @@
-package com.coloza.sample.rabbitmq.consumer;
+package com.example.rabbitmq.consumer;
 
-import com.coloza.sample.rabbitmq.config.RabbitMQConfig;
-import com.coloza.sample.rabbitmq.dto.Task;
+import com.example.rabbitmq.config.RabbitMQConfig;
+import com.example.rabbitmq.dto.Task;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

@@ -1,7 +1,9 @@
-package com.coloza.sample.rabbitmq;
+package com.example.rabbitmq;
 
-import com.coloza.sample.rabbitmq.dto.*;
-import com.coloza.sample.rabbitmq.producer.*;
+import com.example.rabbitmq.dto.*;
+import com.example.rabbitmq.producer.*;
+import com.example.rabbitmq.dto.*;
+import com.example.rabbitmq.producer.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

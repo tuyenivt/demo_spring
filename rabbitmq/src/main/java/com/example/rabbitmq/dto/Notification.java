@@ -1,4 +1,4 @@
-package com.coloza.sample.rabbitmq.dto;
+package com.example.rabbitmq.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RpcRequest {
+public class Notification {
 
-    private int id;
+    private String id;
+    private String type;
     private String message;
+    private String recipient;
 }

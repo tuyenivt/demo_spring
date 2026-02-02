@@ -38,5 +38,5 @@ management:
 
 logging:
   level:
-    com.coloza.sample.rabbitmq: DEBUG
+    com.example.rabbitmq: DEBUG
     org.springframework.amqp: INFO

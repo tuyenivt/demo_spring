@@ -10,7 +10,7 @@ Spring Boot application demonstrating 6 common RabbitMQ messaging patterns with 
 rabbitmq/
 ├── build.gradle
 └── src/main/
-    ├── java/com/coloza/sample/rabbitmq/
+    ├── java/com/example/rabbitmq/
     │   ├── Application.java           # Spring Boot main class
     │   ├── DemoRunner.java            # Runs all pattern demos
     │   ├── config/
@@ -43,14 +43,14 @@ rabbitmq/
 
 ## Messaging Patterns
 
-| # | Pattern | Exchange | Key Classes |
-|---|---------|----------|-------------|
-| 1 | RPC (Topic) | `rpc.topic.exchange` | RpcProducer, RpcConsumer |
-| 2 | Fanout (Pub/Sub) | `notifications.fanout` | NotificationProducer, NotificationConsumer |
-| 3 | Work Queue | Default | TaskProducer, TaskConsumer |
-| 4 | Direct (Routing) | `orders.direct` | OrderProducer, OrderConsumer |
-| 5 | Dead Letter Queue | `payments.dlx` | PaymentProducer, PaymentConsumer |
-| 6 | Delayed Message | TTL + DLX | ReminderProducer, ReminderConsumer |
+| # | Pattern           | Exchange               | Key Classes                                |
+|---|-------------------|------------------------|--------------------------------------------|
+| 1 | RPC (Topic)       | `rpc.topic.exchange`   | RpcProducer, RpcConsumer                   |
+| 2 | Fanout (Pub/Sub)  | `notifications.fanout` | NotificationProducer, NotificationConsumer |
+| 3 | Work Queue        | Default                | TaskProducer, TaskConsumer                 |
+| 4 | Direct (Routing)  | `orders.direct`        | OrderProducer, OrderConsumer               |
+| 5 | Dead Letter Queue | `payments.dlx`         | PaymentProducer, PaymentConsumer           |
+| 6 | Delayed Message   | TTL + DLX              | ReminderProducer, ReminderConsumer         |
 
 ## Key Features
 
@@ -65,14 +65,14 @@ rabbitmq/
 
 All exchange/queue names are defined in `RabbitMQConfig`:
 
-| Constant | Value |
-|----------|-------|
-| `RPC_EXCHANGE` | rpc.topic.exchange |
+| Constant                       | Value                |
+|--------------------------------|----------------------|
+| `RPC_EXCHANGE`                 | rpc.topic.exchange   |
 | `NOTIFICATION_FANOUT_EXCHANGE` | notifications.fanout |
-| `TASK_QUEUE` | tasks.queue |
-| `ORDER_DIRECT_EXCHANGE` | orders.direct |
-| `PAYMENT_DLX_EXCHANGE` | payments.dlx |
-| `REMINDER_DELAY_QUEUE` | reminders.delay |
+| `TASK_QUEUE`                   | tasks.queue          |
+| `ORDER_DIRECT_EXCHANGE`        | orders.direct        |
+| `PAYMENT_DLX_EXCHANGE`         | payments.dlx         |
+| `REMINDER_DELAY_QUEUE`         | reminders.delay      |
 
 ## Dependencies
 
