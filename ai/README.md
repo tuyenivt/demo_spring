@@ -19,7 +19,7 @@ This is a demo AI-powered customer support chatbot designed to assist users with
 - **Integration tests** with Testcontainers
 
 ## Start Ollama
-```shell
+```bash
 docker run -d --name ai-ollama -p 11434:11434 -v ollama:/root/.ollama ollama/ollama:0.15.2
 ```
 Environment Variable:
@@ -27,7 +27,7 @@ Environment Variable:
 - `OLLAMA_MODEL=llama3.1`
 
 ## Start Vector DB
-```shell
+```bash
 docker run -d --name ai-qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant:v1.16
 ```
 Environment Variable:
@@ -37,63 +37,63 @@ Environment Variable:
 ## Test via REST API
 
 ### Ask a Question
-```shell
+```bash
 curl -X POST http://localhost:8080/question/test_user \
      -H "Content-Type: application/json" \
      -d '{"question": "What are insurance supported?"}'
 ```
 
 ### Stream Response (SSE)
-```shell
+```bash
 curl -N http://localhost:8080/question/test_user/stream?question=What%20insurance%20providers%20are%20supported
 ```
 
 ### Get Conversation History
-```shell
+```bash
 curl http://localhost:8080/conversations/test_user
 ```
 
 ### Get Conversation History with Limit
-```shell
+```bash
 curl http://localhost:8080/conversations/test_user?limit=10
 ```
 
 ### Clear Conversation
-```shell
+```bash
 curl -X DELETE http://localhost:8080/conversations/test_user
 ```
 
 ### Add Document to Vector Store
-```shell
+```bash
 curl -X POST http://localhost:8080/admin/documents \
      -H "Content-Type: application/json" \
      -d '{"content": "New policy information here", "metadata": {"source": "admin"}}'
 ```
 
 ### Health Check
-```shell
+```bash
 curl http://localhost:8080/actuator/health
 ```
 
 ### Metrics
-```shell
+```bash
 curl http://localhost:8080/actuator/metrics
 ```
 
 ### AI-specific Metrics
-```shell
+```bash
 curl http://localhost:8080/actuator/metrics/ai.questions.total
 curl http://localhost:8080/actuator/metrics/ai.response.time
 ```
 
 ## Test Chat Memory via REST API
-```shell
+```bash
 curl -X POST http://localhost:8080/question/test_user \
      -H "Content-Type: application/json" \
      -d '{"question": "My name is Spring"}'
 ```
 
-```shell
+```bash
 curl -X POST http://localhost:8080/question/test_user \
      -H "Content-Type: application/json" \
      -d '{"question": "Do you remember my name?"}'

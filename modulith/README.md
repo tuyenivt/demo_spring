@@ -44,7 +44,7 @@ Each module can later be extracted into a microservice with minimal refactoring.
 
 1. Synchronous Communication (Direct API Calls)
     Used when immediate response is needed:
-    ```shell
+    ```bash
     // Order module calling Customer module
     if (!customerFacade.customerExists(command.customerId())) {
         throw new IllegalArgumentException("Customer does not exist");
@@ -52,7 +52,7 @@ Each module can later be extracted into a microservice with minimal refactoring.
     ```
 2. Asynchronous Communication (Events)
     Used for cross-cutting concerns and eventual consistency:
-    ```shell
+    ```bash
     // Customer module publishes event
     eventPublisher.publishEvent(new CustomerRegisteredEvent(...));
     
@@ -70,14 +70,13 @@ Each module can later be extracted into a microservice with minimal refactoring.
 
 ### Start MySQL with docker
 
-```shell
-docker network create devnet
-docker run -d --network devnet --name demodb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=demodb -p 3306:3306 mysql:8.4
+```bash
+docker run -d --name demodb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=demodb -p 3306:3306 mysql:8.4
 ```
 
 ### Run app
 
-```shell
+```bash
 ./gradlew modulith:clean modulith:bootRun
 ```
 
@@ -87,7 +86,7 @@ Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 Register a Customer
 
-```shell
+```bash
 curl -X POST http://localhost:8080/api/customers \
   -H "Content-Type: application/json" \
   -d '{
@@ -98,7 +97,7 @@ curl -X POST http://localhost:8080/api/customers \
 
 Create an Order
 
-```shell
+```bash
 curl -X POST http://localhost:8080/api/orders \
   -H "Content-Type: application/json" \
   -d '{
@@ -109,7 +108,7 @@ curl -X POST http://localhost:8080/api/orders \
 
 Reserve Stock
 
-```shell
+```bash
 curl -X POST http://localhost:8080/api/inventory/reserve \
   -H "Content-Type: application/json" \
   -d '{
@@ -120,6 +119,6 @@ curl -X POST http://localhost:8080/api/inventory/reserve \
 
 Check Stock
 
-```shell
+```bash
 curl http://localhost:8080/api/inventory/check/LAPTOP-001?quantity=5
 ```

@@ -6,9 +6,7 @@ Spring Modulith demo showcasing modular monolith architecture with event-driven 
 
 ```bash
 # Start MySQL
-docker run -d --network devnet --name demodb \
-  -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=demodb \
-  -p 3306:3306 mysql:8.4
+docker run -d --name demodb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=demodb -p 3306:3306 mysql:8.4
 
 # Run application
 ./gradlew modulith:bootRun

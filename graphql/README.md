@@ -2,7 +2,7 @@
 
 ## Run project
 
-```shell
+```bash
 ./gradlew graphql:clean graphql:bootRun
 ```
 

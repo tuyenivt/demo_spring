@@ -2,7 +2,7 @@
 
 ## Run project
 
-```shell
+```bash
 ./gradlew websocket:clean websocket:bootRun
 ```
 
