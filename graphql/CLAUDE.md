@@ -15,7 +15,7 @@ cd graphql
 ## Project Structure
 
 ```
-src/main/java/com/coloza/demo/graphql/
+src/main/java/com/example/graphql/
 ├── config/           # GraphQL configuration (scalars)
 ├── controller/       # GraphQL resolvers (@QueryMapping, @MutationMapping)
 ├── service/          # Business logic with validation
@@ -61,27 +61,27 @@ src/main/resources/graphql/
 
 ### Queries
 
-| Query | Description |
-|-------|-------------|
-| `student(id)` | Get student by ID |
-| `studentsPage(page, filter, sort)` | Offset-based pagination |
+| Query                                          | Description                     |
+|------------------------------------------------|---------------------------------|
+| `student(id)`                                  | Get student by ID               |
+| `studentsPage(page, filter, sort)`             | Offset-based pagination         |
 | `studentsConnection(connection, filter, sort)` | Cursor-based (Relay) pagination |
-| `vehiclesPage(page, filter, sort)` | Offset-based pagination |
-| `vehiclesConnection(connection, filter, sort)` | Cursor-based pagination |
-| `apiVersion` | API version info |
+| `vehiclesPage(page, filter, sort)`             | Offset-based pagination         |
+| `vehiclesConnection(connection, filter, sort)` | Cursor-based pagination         |
+| `apiVersion`                                   | API version info                |
 
 ### Mutations
 
-| Mutation | Description |
-|----------|-------------|
-| `createStudent(input)` | Create single student |
-| `createStudents(inputs)` | Bulk create students |
-| `updateStudent(input)` | Partial update |
-| `upsertStudent(input)` | Create or update |
-| `createVehicle(input)` | Create vehicle |
-| `createVehicles(inputs)` | Bulk create vehicles |
-| `updateVehicle(input)` | Partial update |
-| `upsertVehicle(input)` | Create or update |
+| Mutation                 | Description           |
+|--------------------------|-----------------------|
+| `createStudent(input)`   | Create single student |
+| `createStudents(inputs)` | Bulk create students  |
+| `updateStudent(input)`   | Partial update        |
+| `upsertStudent(input)`   | Create or update      |
+| `createVehicle(input)`   | Create vehicle        |
+| `createVehicles(inputs)` | Bulk create vehicles  |
+| `updateVehicle(input)`   | Partial update        |
+| `upsertVehicle(input)`   | Create or update      |
 
 ## Filtering
 
