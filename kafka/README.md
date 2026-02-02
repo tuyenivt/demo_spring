@@ -17,7 +17,7 @@
                        --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
 </pre>
 <p><strong>Start kafka streams application</strong>:</p>
-<pre>kafka-run-class com.coloza.demo.kafkastreams.WordCountStreamsApp</pre>
+<pre>kafka-run-class com.demo.kafkastreams.WordCountStreamsApp</pre>
 <p><strong>Start kafka producer</strong>: using <code>kafka-console-producer</code> to send some plaintext messages</p>
 <pre>kafka-console-producer --broker-list localhost:9092 --topic streams-plaintext-input</pre>
 <p>Now you can see what output on <code>kafka consumer</code>, keeping send plaintext message and see output changes</p>
@@ -26,13 +26,13 @@
 #### Description
 <p>Write a stream application, that</p>
 <ul>
-<li>Take a comma delimited topic of user,colour
+<li>Take a comma-delimited topic of user,colour
 <ul>
 <li>Filter out bad data</li>
-<li>Keep only colour of "red", "blue", or "green"</li>
+<li>Keep only color of "red", "blue", or "green"</li>
 </ul>
 </li>
-<li>Get the running count of the favourite colours overall and output this to a topic</li>
+<li>Get the running count of the favourite colors overall and output this to a topic</li>
 <li>A user's favourite colour can change</li>
 </ul>
 
@@ -42,9 +42,9 @@
 <li>max,red</li>
 <li>sky,blue</li>
 <li>peter,green</li>
-<li>max,blue (max's favourite colour updated here)</li>
+<li>max,blue (max's favourite color updated here)</li>
 <li>some bad data without comma (should be filtered out)</li>
-<li>some bad data with comma,but have not colour in red or blue or green (should be filtered out)</li>
+<li>some bad data with comma,but have not colored in red or blue or green (should be filtered out)</li>
 </ul>
 <p>Output:</p>
 <table border="1">
@@ -82,7 +82,7 @@
                        --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
 </pre>
 <p><strong>Start kafka streams application</strong>:</p>
-<pre>kafka-run-class com.coloza.demo.kafkastreams.FavouriteColourStreamsAppRunner</pre>
+<pre>kafka-run-class com.demo.kafkastreams.FavouriteColourStreamsAppRunner</pre>
 <p><strong>Start kafka producer</strong>: using <code>kafka-console-producer</code> to send messages</p>
 <pre>kafka-console-producer --broker-list localhost:9092 --topic favouritecolour-streams-input</pre>
 <p>Now you can see what output on <code>kafka consumer</code>, keeping send messages and see output changes</p>

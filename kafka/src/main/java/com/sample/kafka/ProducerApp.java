@@ -1,4 +1,4 @@
-package com.coloza.sample.kafka;
+package com.sample.kafka;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;

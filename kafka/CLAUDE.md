@@ -11,7 +11,7 @@ kafka/
 ├── build.gradle
 ├── README.md
 └── src/
-    ├── main/java/com/coloza/sample/kafka/
+    ├── main/java/com/sample/kafka/
     │   ├── ProducerApp.java              # Native Kafka producer examples
     │   ├── ConsumerApp.java              # Native Kafka consumer examples
     │   ├── StreamsApp.java               # Basic filtering stream
@@ -19,7 +19,7 @@ kafka/
     │   ├── FavouriteColourStreamsApp.java # Stateful aggregation stream
     │   ├── BankTransactionStreamsApp.java # JSON aggregation with exactly-once
     │   └── BankTransactionProducer.java   # JSON message producer
-    └── test/java/com/coloza/sample/kafka/
+    └── test/java/com/sample/kafka/
         ├── ProducerAppTests.java
         ├── ConsumerAppTests.java
         ├── StreamsAppTests.java
@@ -41,24 +41,24 @@ kafka/
 
 Native Kafka producer with multiple configuration profiles:
 
-| Method | Purpose | Key Config |
-|--------|---------|------------|
-| `produceMessage()` | Basic async producer | Default settings |
-| `produceMessageWithCallback()` | Async with delivery callback | Logs metadata on success/failure |
-| `produceMessageKey()` | Keyed messages (sync) | Uses `.get()` for blocking |
-| `produceMessageWithSafeProducer()` | Idempotent producer | `acks=all`, `idempotence=true`, `retries=MAX` |
-| `produceMessageWithHighThroughputProducer()` | Throughput optimized | SNAPPY compression, 20ms linger, 32KB batch |
+| Method                                       | Purpose                      | Key Config                                    |
+|----------------------------------------------|------------------------------|-----------------------------------------------|
+| `produceMessage()`                           | Basic async producer         | Default settings                              |
+| `produceMessageWithCallback()`               | Async with delivery callback | Logs metadata on success/failure              |
+| `produceMessageKey()`                        | Keyed messages (sync)        | Uses `.get()` for blocking                    |
+| `produceMessageWithSafeProducer()`           | Idempotent producer          | `acks=all`, `idempotence=true`, `retries=MAX` |
+| `produceMessageWithHighThroughputProducer()` | Throughput optimized         | SNAPPY compression, 20ms linger, 32KB batch   |
 
 ### 2. ConsumerApp
 
 Native Kafka consumer with various consumption patterns:
 
-| Method | Purpose | Key Config |
-|--------|---------|------------|
-| `consumeMessage()` | Basic polling loop | `AUTO_OFFSET_RESET=EARLIEST` |
-| `consumeMessageWithThread()` | Multi-threaded with graceful shutdown | `CountDownLatch`, `WakeupException` |
-| `consumeMessageAssignAndSeek()` | Manual partition assignment | Seek to specific offset, read N messages |
-| `consumeMessageWithManualCommit()` | Manual offset commit | `AUTO_COMMIT=false`, `commitSync()` |
+| Method                             | Purpose                               | Key Config                               |
+|------------------------------------|---------------------------------------|------------------------------------------|
+| `consumeMessage()`                 | Basic polling loop                    | `AUTO_OFFSET_RESET=EARLIEST`             |
+| `consumeMessageWithThread()`       | Multi-threaded with graceful shutdown | `CountDownLatch`, `WakeupException`      |
+| `consumeMessageAssignAndSeek()`    | Manual partition assignment           | Seek to specific offset, read N messages |
+| `consumeMessageWithManualCommit()` | Manual offset commit                  | `AUTO_COMMIT=false`, `commitSync()`      |
 
 ### 3. Kafka Streams Applications
 
@@ -80,15 +80,15 @@ Native Kafka consumer with various consumption patterns:
 
 ## Topics Reference
 
-| Topic | Format | Purpose |
-|-------|--------|---------|
-| `first_topic` | String | Basic producer/consumer testing |
-| `streams-plaintext-input` | Plain text | WordCount input |
-| `streams-wordcount-output` | String/Long | WordCount output |
-| `favouritecolour-streams-input` | CSV | FavouriteColour input |
-| `favouritecolour-streams-output` | String/Long | FavouriteColour output (compacted) |
-| `streams-bank-transaction-input` | JSON | BankTransaction input |
-| `streams-bank-transaction-output` | JSON | BankTransaction output (compacted) |
+| Topic                             | Format      | Purpose                            |
+|-----------------------------------|-------------|------------------------------------|
+| `first_topic`                     | String      | Basic producer/consumer testing    |
+| `streams-plaintext-input`         | Plain text  | WordCount input                    |
+| `streams-wordcount-output`        | String/Long | WordCount output                   |
+| `favouritecolour-streams-input`   | CSV         | FavouriteColour input              |
+| `favouritecolour-streams-output`  | String/Long | FavouriteColour output (compacted) |
+| `streams-bank-transaction-input`  | JSON        | BankTransaction input              |
+| `streams-bank-transaction-output` | JSON        | BankTransaction output (compacted) |
 
 ## Configuration Patterns
 
