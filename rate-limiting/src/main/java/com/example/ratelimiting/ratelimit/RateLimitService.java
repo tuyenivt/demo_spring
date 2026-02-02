@@ -1,5 +1,6 @@
 package com.example.ratelimiting.ratelimit;
 
+import com.example.ratelimiting.dto.ConsumeResult;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +14,16 @@ public class RateLimitService {
 
     private final LettuceBasedProxyManager<String> proxyManager;
 
-    public boolean tryConsume(String key, long limit, long durationSeconds) {
+    public ConsumeResult tryConsumeWithInfo(String key, long limit, long durationSeconds) {
         var bucket = proxyManager.builder().build(key, () -> buildConfig(limit, durationSeconds));
-        return bucket.tryConsume(1);
+        var probe = bucket.tryConsumeAndReturnRemaining(1);
+
+        var resetTime = System.currentTimeMillis() / 1000 + durationSeconds;
+        var retryAfter = probe.isConsumed() ? 0 : probe.getNanosToWaitForRefill() / 1_000_000_000;
+
+        return new ConsumeResult(probe.isConsumed(), probe.getRemainingTokens(), resetTime, retryAfter);
     }
 
-    /**
-     * Config max `limit` requests per `durationSeconds` seconds
-     */
     private BucketConfiguration buildConfig(long limit, long durationSeconds) {
         return BucketConfiguration.builder()
                 .addLimit(l -> l

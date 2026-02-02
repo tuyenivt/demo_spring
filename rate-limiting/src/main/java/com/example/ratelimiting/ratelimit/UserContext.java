@@ -1,24 +1,32 @@
 package com.example.ratelimiting.ratelimit;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
+@Getter
 @Component
 @RequestScope
 public class UserContext {
 
-    private final String userId;
+    private final String identifier;
 
     public UserContext(HttpServletRequest request) {
-        this.userId = request.getHeader("X-USER-ID");
+        var userId = request.getHeader("X-USER-ID");
+        if (userId != null && !userId.isBlank()) {
+            this.identifier = "user:" + userId;
+        } else {
+            this.identifier = "ip:" + getClientIp(request);
+        }
     }
 
-    public String getUserId() {
-        if (userId == null || userId.isBlank()) {
-            throw new IllegalStateException("Unrecognized User Identifier");
+    private String getClientIp(HttpServletRequest request) {
+        var forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
         }
-        return userId;
+        return request.getRemoteAddr();
     }
 
 //    public String getUserIdFromSecurityContext() {

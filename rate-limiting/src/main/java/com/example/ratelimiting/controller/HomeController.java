@@ -11,12 +11,24 @@ public class HomeController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Hello, no rate limit api!";
+        return "Hello, no rate limit!";
     }
 
     @RateLimit(limit = 5, durationSeconds = 60)
     @GetMapping("/orders")
     public String orders() {
-        return "Rate limited api (Orders API))";
+        return "Orders API - 5 requests per minute";
+    }
+
+    @RateLimit(limit = 20, durationSeconds = 60)
+    @GetMapping("/search")
+    public String search() {
+        return "Search API - 20 requests per minute";
+    }
+
+    @RateLimit(limit = 100, durationSeconds = 3600)
+    @GetMapping("/reports")
+    public String reports() {
+        return "Reports API - 100 requests per hour";
     }
 }
