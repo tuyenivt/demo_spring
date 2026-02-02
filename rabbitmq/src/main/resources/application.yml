@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: rabbitmq
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    virtual-host: /
+
+    # Publisher confirms for reliable message delivery
+    publisher-confirm-type: correlated
+    publisher-returns: true
+
+    # Listener configuration
+    listener:
+      simple:
+        # Fair dispatch: one message at a time per worker
+        prefetch: 1
+        # Default retry configuration
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2.0
+
+# Actuator health check for RabbitMQ
+management:
+  health:
+    rabbit:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.coloza.sample.rabbitmq: DEBUG
+    org.springframework.amqp: INFO

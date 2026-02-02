@@ -2,57 +2,83 @@
 
 ## Overview
 
-Spring Boot application demonstrating RabbitMQ messaging with RPC (Request-Reply) pattern using Topic Exchange.
+Spring Boot application demonstrating 6 common RabbitMQ messaging patterns with JSON serialization and best practices.
 
 ## Project Structure
 
 ```
 rabbitmq/
 ├── build.gradle
-└── src/main/java/com/coloza/sample/rabbitmq/
-    ├── Application.java       # Main config, queue/exchange/binding beans
-    ├── Runner.java            # Message producer (CommandLineRunner)
-    ├── Receiver.java          # Message consumer
-    ├── SendObjectMessage.java # Request DTO
-    └── RelyObjectMessage.java # Reply DTO
+└── src/main/
+    ├── java/com/coloza/sample/rabbitmq/
+    │   ├── Application.java           # Spring Boot main class
+    │   ├── DemoRunner.java            # Runs all pattern demos
+    │   ├── config/
+    │   │   └── RabbitMQConfig.java    # All exchanges, queues, bindings
+    │   ├── producer/
+    │   │   ├── RpcProducer.java       # RPC pattern
+    │   │   ├── NotificationProducer.java  # Fanout
+    │   │   ├── TaskProducer.java      # Work queue
+    │   │   ├── OrderProducer.java     # Direct exchange
+    │   │   ├── PaymentProducer.java   # DLQ demo
+    │   │   └── ReminderProducer.java  # Delayed message
+    │   ├── consumer/
+    │   │   ├── RpcConsumer.java
+    │   │   ├── NotificationConsumer.java
+    │   │   ├── TaskConsumer.java
+    │   │   ├── OrderConsumer.java
+    │   │   ├── PaymentConsumer.java
+    │   │   └── ReminderConsumer.java
+    │   └── dto/
+    │       ├── RpcRequest.java
+    │       ├── RpcResponse.java
+    │       ├── Notification.java
+    │       ├── Task.java
+    │       ├── Order.java
+    │       ├── Payment.java
+    │       └── Reminder.java
+    └── resources/
+        └── application.yml            # Externalized configuration
 ```
 
-## Key Components
+## Messaging Patterns
 
-| Component | Purpose |
-|-----------|---------|
-| `Application` | Configures Queue, TopicExchange, Binding, MessageListenerAdapter |
-| `Runner` | Sends 5 messages using `RabbitTemplate.convertSendAndReceive()` |
-| `Receiver` | Receives messages, returns reply objects |
-| `SendObjectMessage` | Request payload (id, sendMessage) |
-| `RelyObjectMessage` | Reply payload (id, relyMessage) |
+| # | Pattern | Exchange | Key Classes |
+|---|---------|----------|-------------|
+| 1 | RPC (Topic) | `rpc.topic.exchange` | RpcProducer, RpcConsumer |
+| 2 | Fanout (Pub/Sub) | `notifications.fanout` | NotificationProducer, NotificationConsumer |
+| 3 | Work Queue | Default | TaskProducer, TaskConsumer |
+| 4 | Direct (Routing) | `orders.direct` | OrderProducer, OrderConsumer |
+| 5 | Dead Letter Queue | `payments.dlx` | PaymentProducer, PaymentConsumer |
+| 6 | Delayed Message | TTL + DLX | ReminderProducer, ReminderConsumer |
 
-## RabbitMQ Configuration
+## Key Features
 
-- **Exchange**: `sample-spring-messaging-rabbitmq-exchange` (Topic)
-- **Queue**: `sample-spring-messaging-rabbitmq` (non-durable)
-- **Routing Key**: `foo.bar.#` (wildcard pattern)
-- **Pattern**: RPC (synchronous request-reply)
+- **JSON Serialization**: Uses `Jackson2JsonMessageConverter` instead of Java serialization
+- **Publisher Confirms**: Enabled for reliable message delivery
+- **Manual Acknowledgment**: TaskConsumer uses manual acks for reliable processing
+- **Fair Dispatch**: Prefetch=1 for work queue pattern
+- **Health Check**: Actuator endpoint at `/actuator/health`
+- **Externalized Config**: Environment variables for connection settings
 
-## Message Flow
+## Configuration Constants
 
-1. Runner sends `SendObjectMessage` to exchange with routing key `foo.bar.baz`
-2. Exchange routes to queue (matches `foo.bar.#` pattern)
-3. Receiver consumes and returns `RelyObjectMessage`
-4. Runner receives reply via RabbitMQ RPC mechanism
+All exchange/queue names are defined in `RabbitMQConfig`:
+
+| Constant | Value |
+|----------|-------|
+| `RPC_EXCHANGE` | rpc.topic.exchange |
+| `NOTIFICATION_FANOUT_EXCHANGE` | notifications.fanout |
+| `TASK_QUEUE` | tasks.queue |
+| `ORDER_DIRECT_EXCHANGE` | orders.direct |
+| `PAYMENT_DLX_EXCHANGE` | payments.dlx |
+| `REMINDER_DELAY_QUEUE` | reminders.delay |
 
 ## Dependencies
 
 - `spring-boot-starter-amqp` - Spring AMQP for RabbitMQ
+- `spring-boot-starter-actuator` - Health checks
 - `lombok` - Boilerplate reduction
-
-## Running
-
-Requires RabbitMQ server running on default port (5672).
-
-```bash
-./gradlew :rabbitmq:bootRun
-```
 
 ## Common Commands
 
@@ -66,3 +92,14 @@ Requires RabbitMQ server running on default port (5672).
 # Run
 ./gradlew :rabbitmq:bootRun
 ```
+
+## Demo Output
+
+When running, the application demonstrates all 6 patterns sequentially:
+
+1. **RPC**: Sends 3 request-reply messages
+2. **Fanout**: Broadcasts 1 notification to email + SMS queues
+3. **Work Queue**: Submits 5 tasks for worker processing
+4. **Direct**: Sends 1 urgent + 1 normal order
+5. **DLQ**: Submits 1 valid + 1 invalid payment (invalid goes to DLQ)
+6. **Delayed**: Schedules 1 reminder (delivered after 10s delay)
