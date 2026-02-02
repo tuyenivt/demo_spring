@@ -1,4 +1,4 @@
-# demo_spring_monitor
+# Monitoring Demo
 
 Spring Boot application demonstrating monitoring and observability using Actuator, Prometheus, and Grafana.
 

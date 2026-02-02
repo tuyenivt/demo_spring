@@ -1,4 +1,4 @@
-# Demo GraphQL with Java
+# Spring GraphQL Demo
 
 ## Run project
 

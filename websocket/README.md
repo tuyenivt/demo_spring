@@ -1,4 +1,4 @@
-# Demo WebSocket
+# Spring WebSocket Demo
 
 ## Run project
 

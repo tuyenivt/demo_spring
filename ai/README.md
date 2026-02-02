@@ -1,4 +1,4 @@
-# demo_ai
+# Spring AI Demo
 
 ## Overview
 This is a demo AI-powered customer support chatbot designed to assist users with inquiries about **HealthConnect**, a telehealth platform.

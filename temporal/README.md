@@ -1,4 +1,4 @@
-# temporal
+# Temporal Demo
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# Demo Spring Versioning
+# Versioning Demo
 
 ## API Versioning Strategies
 

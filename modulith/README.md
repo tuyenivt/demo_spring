@@ -1,4 +1,4 @@
-# modulith
+# Spring Modulith Demo
 
 ## Overview
 

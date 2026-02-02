@@ -1,9 +1,8 @@
-# rate-limiting
+# Rate Limiting Demo
 
 ## Quick Start
 
 ```bash
-# Start Redis (Docker)
 docker run -d --name redis -p 6379:6379 redis:8.4-alpine
 ```
 

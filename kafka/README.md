@@ -1,4 +1,4 @@
-# Demo Kafka
+# Spring Kafka Demo
 
 ### WordCount Demo
 <p><strong>Create 2 topics:</strong></p>
