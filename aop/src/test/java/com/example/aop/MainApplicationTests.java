@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Arrays;
 
 @SpringBootTest
-public class MainApplicationTests {
+class MainApplicationTests {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -19,11 +19,11 @@ public class MainApplicationTests {
     private Service service;
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
     }
 
     @Test
-    public void testServe() throws InterruptedException {
+    void testServe() throws InterruptedException {
         logger.info("testServe - before - factor 1");
         service.serve(1);
         logger.info("testServe - after - factor 1");
@@ -33,39 +33,38 @@ public class MainApplicationTests {
     }
 
     @Test
-    public void testFindAccounts() {
+    void testFindAccounts() {
         logger.info("testFindAccounts - before");
         service.findAccounts(Arrays.asList(1, 2, 3, 4, 5));
         logger.info("testFindAccounts - after");
     }
 
     @Test
-    public void testFindAccountsOrExceptionIfNotFound() {
+    void testFindAccountsOrExceptionIfNotFound() {
         logger.info("testFindAccountsOrExceptionIfNotFound - before");
         try {
             service.findAccountsOrExceptionIfNotFound(Arrays.asList(1, 2, 3, 4, 5));
             Assertions.fail();
         } catch (Exception e) {
-            logger.info("testFindAccountsOrExceptionIfNotFound - after with exception:" + e);
+            logger.error("testFindAccountsOrExceptionIfNotFound - after with exception:", e);
         }
     }
 
     @Test
-    public void testAddAccount() {
+    void testAddAccount() {
         logger.info("testAddAccount - before");
         service.addAccount();
         logger.info("testAddAccount - after");
     }
 
     @Test
-    public void testDeleteAccount() {
+    void testDeleteAccount() {
         logger.info("testDeleteAccount - before");
         try {
             service.deleteAccount(1);
             Assertions.fail();
         } catch (Exception e) {
-            logger.info("testDeleteAccount - after with exception:" + e);
+            logger.error("testDeleteAccount - after with exception:", e);
         }
     }
-
 }

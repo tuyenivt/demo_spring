@@ -1,11 +1,10 @@
 package com.example.aop.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.example.aop.entity.Account;
 import org.springframework.stereotype.Component;
 
-import com.example.aop.entity.Account;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class AccountDao {
@@ -19,7 +18,6 @@ public class AccountDao {
     }
 
     public void add() {
-
     }
 
     public void delete(int id) {

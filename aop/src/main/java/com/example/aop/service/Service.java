@@ -1,40 +1,37 @@
 package com.example.aop.service;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.example.aop.aspect.LogExecutionTime;
 import com.example.aop.dao.AccountDao;
 import com.example.aop.entity.Account;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class Service {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private AccountDao accountDao;
+    private final AccountDao accountDao;
 
     @LogExecutionTime
     public void serve(int factor) throws InterruptedException {
-        Thread.sleep(factor * 1000);
+        Thread.sleep(factor * 1000L);
     }
 
     public List<Account> findAccounts(List<Integer> ids) {
-        logger.info("findAccounts - executing...");
-        List<Account> found = accountDao.find(ids);
-        logger.info("findAccounts - returned result is " + found);
+        log.info("findAccounts - executing...");
+        var found = accountDao.find(ids);
+        log.info("findAccounts - returned result is {}", found);
         return found;
     }
 
     public List<Account> findAccountsOrExceptionIfNotFound(List<Integer> ids) {
-        logger.info("findAccountsOrExceptionIfNotFound - executing...");
-        List<Account> found = accountDao.findOrExceptionIfNotFound(ids);
-        logger.info("findAccountsOrExceptionIfNotFound - returned result is " + found);
+        log.info("findAccountsOrExceptionIfNotFound - executing...");
+        var found = accountDao.findOrExceptionIfNotFound(ids);
+        log.info("findAccountsOrExceptionIfNotFound - returned result is {}", found);
         return found;
     }
 

@@ -8,5 +8,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD) // where our annotation will be applicable. Here it will only work on methods
 @Retention(RetentionPolicy.RUNTIME) // the annotation will be available to the JVM at runtime or not
 public @interface LogExecutionTime {
-
 }
