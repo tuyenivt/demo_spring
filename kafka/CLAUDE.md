@@ -11,7 +11,7 @@ kafka/
 ├── build.gradle
 ├── README.md
 └── src/
-    ├── main/java/com/sample/kafka/
+    ├── main/java/com/example/kafka/
     │   ├── ProducerApp.java              # Native Kafka producer examples
     │   ├── ConsumerApp.java              # Native Kafka consumer examples
     │   ├── StreamsApp.java               # Basic filtering stream
@@ -19,7 +19,7 @@ kafka/
     │   ├── FavouriteColourStreamsApp.java # Stateful aggregation stream
     │   ├── BankTransactionStreamsApp.java # JSON aggregation with exactly-once
     │   └── BankTransactionProducer.java   # JSON message producer
-    └── test/java/com/sample/kafka/
+    └── test/java/com/example/kafka/
         ├── ProducerAppTests.java
         ├── ConsumerAppTests.java
         ├── StreamsAppTests.java
