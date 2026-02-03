@@ -13,6 +13,8 @@ Spring Boot application demonstrating **MySQL master-slave replication** with re
 - **Reader Config**: `src/main/java/.../config/ReaderDatabaseConfig.java` (replica, port 3307)
 - **Write Repository**: `src/main/java/.../repository/write/UserWriteRepository.java`
 - **Read Repository**: `src/main/java/.../repository/read/UserReadRepository.java`
+- **DTOs**: `src/main/java/.../dto/CreateUserRequest.java`, `UserResponse.java`
+- **Aspect**: `src/main/java/.../aspect/DatabaseRoutingAspect.java`
 - **Docker Setup**: `docker/docker-compose.yml`
 - **Schema Migrations**: `src/main/resources/db/changelog/db.changelog-master.xml`
 
@@ -20,7 +22,9 @@ Spring Boot application demonstrating **MySQL master-slave replication** with re
 
 ```
 [Client] --> [Controller] --> [Service] --> [Write Repo] --> [Master DB :3306]
-                                        --> [Read Repo]  --> [Replica DB :3307]
+                |                       --> [Read Repo]  --> [Replica DB :3307]
+                |
+            [DTOs: CreateUserRequest / UserResponse]
 ```
 
 ### Transaction Managers
@@ -33,6 +37,8 @@ Spring Boot application demonstrating **MySQL master-slave replication** with re
 - Liquibase runs **only on master** (writer datasource)
 - Reader datasource has `hibernate.connection.readOnly=true`
 - GTID replication ensures consistency across failovers
+- Input validation with `@Valid` and Bean Validation annotations
+- OpenAPI documentation available at `/swagger-ui.html`
 
 ## Common Commands
 
@@ -52,12 +58,20 @@ cd docker && docker compose down --volumes --remove-orphans
 
 ## API Endpoints
 
-| Method | Path                 | Description  | DB Target      |
-|--------|----------------------|--------------|----------------|
-| POST   | `/users`             | Create user  | Master (write) |
-| GET    | `/users/{id}`        | Get by ID    | Replica (read) |
-| GET    | `/users/name/{name}` | Find by name | Replica (read) |
-| DELETE | `/users/{id}`        | Delete user  | Master (write) |
+| Method | Path                 | Description           | DB Target      |
+|--------|----------------------|-----------------------|----------------|
+| POST   | `/users`             | Create user           | Master (write) |
+| GET    | `/users`             | List users (paginated)| Replica (read) |
+| GET    | `/users/{id}`        | Get by ID             | Replica (read) |
+| GET    | `/users/name/{name}` | Find by name          | Replica (read) |
+| DELETE | `/users/{id}`        | Delete user           | Master (write) |
+
+### Pagination Parameters
+
+- `page` - Page number (default: 0)
+- `size` - Page size (default: 20)
+
+Example: `GET /users?page=0&size=10`
 
 ## Key Implementation Details
 
@@ -65,6 +79,10 @@ cd docker && docker compose down --volumes --remove-orphans
 2. **Separate EntityManagerFactory**: Each datasource has its own persistence unit
 3. **Repository Package Segregation**: Write repos in `.repository.write`, read repos in `.repository.read`
 4. **GTID Mode**: Uses `SOURCE_AUTO_POSITION=1` for automatic position tracking
+5. **DTOs**: Request/Response DTOs decouple API contracts from entities
+6. **Input Validation**: Bean Validation on `CreateUserRequest` (name required, valid email)
+7. **DatabaseRoutingAspect**: Logs READ/WRITE operations for debugging (DEBUG level)
+8. **OpenAPI/Swagger**: Auto-generated API docs at `/swagger-ui.html`
 
 ## Gotchas
 

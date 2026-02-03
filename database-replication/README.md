@@ -33,6 +33,8 @@ This project showcases how to implement database replication in a Spring applica
 - MySQL 8.4 (GTID replication)
 - Liquibase (schema migrations)
 - Docker Compose
+- SpringDoc OpenAPI (Swagger UI)
+- Testcontainers (integration tests)
 
 ## Quick Start
 
@@ -61,6 +63,9 @@ curl -X POST http://localhost:8080/users \
   -H "Content-Type: application/json" \
   -d '{"name": "John Doe", "email": "john@example.com"}'
 
+# List all users with pagination (reads from replica)
+curl "http://localhost:8080/users?page=0&size=10"
+
 # Get user by ID (reads from replica)
 curl http://localhost:8080/users/1
 
@@ -71,7 +76,11 @@ curl "http://localhost:8080/users/name/John%20Doe"
 curl -X DELETE http://localhost:8080/users/1
 ```
 
-### 4. Clean Up
+### 4. View API Documentation
+
+Open [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) in your browser to see the interactive API documentation.
+
+### 5. Clean Up
 
 ```bash
 cd docker
@@ -98,12 +107,40 @@ When creating a user, the service reads immediately from the master to ensure th
 
 ## API Reference
 
-| Method | Endpoint             | Description        | Database |
-|--------|----------------------|--------------------|----------|
-| POST   | `/users`             | Create a new user  | Master   |
-| GET    | `/users/{id}`        | Get user by ID     | Replica  |
-| GET    | `/users/name/{name}` | Find users by name | Replica  |
-| DELETE | `/users/{id}`        | Delete a user      | Master   |
+| Method | Endpoint             | Description              | Database |
+|--------|----------------------|--------------------------|----------|
+| POST   | `/users`             | Create a new user        | Master   |
+| GET    | `/users`             | List users (paginated)   | Replica  |
+| GET    | `/users/{id}`        | Get user by ID           | Replica  |
+| GET    | `/users/name/{name}` | Find users by name       | Replica  |
+| DELETE | `/users/{id}`        | Delete a user            | Master   |
+
+### Request/Response DTOs
+
+**CreateUserRequest**:
+```json
+{
+  "name": "John Doe",        // required
+  "email": "john@example.com" // required, valid email
+}
+```
+
+**UserResponse**:
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+### Pagination
+
+Use query parameters for paginated list endpoint:
+- `page` - Page number (0-indexed, default: 0)
+- `size` - Page size (default: 20)
+
+Example: `GET /users?page=0&size=10`
 
 ## Troubleshooting
 
