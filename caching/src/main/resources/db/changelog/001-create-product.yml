@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-product-table
+      author: system
+      changes:
+        - createTable:
+            tableName: product
+            columns:
+              - column:
+                  name: product_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: product_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: category
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: in_stock
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: date_of_manufacture
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: vendor
+                  type: VARCHAR(255)
+
+        - createIndex:
+            tableName: product
+            indexName: idx_product_name
+            columns:
+              - column:
+                  name: product_name
+
+        - createIndex:
+            tableName: product
+            indexName: idx_product_updated_at
+            columns:
+              - column:
+                  name: updated_at

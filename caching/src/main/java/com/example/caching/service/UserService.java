@@ -13,7 +13,7 @@ public class UserService {
         redisTemplate.opsForList().rightPush("user:activities:" + userId, activity);
     }
 
-    public void getOldestUserActivity(String userId) {
-        redisTemplate.opsForList().leftPop("user:activities:" + userId);
+    public String getOldestUserActivity(String userId) {
+        return redisTemplate.opsForList().leftPop("user:activities:" + userId);
     }
 }

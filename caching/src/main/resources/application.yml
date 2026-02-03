@@ -2,20 +2,33 @@ spring:
   application:
     name: caching
   datasource:
-    url: jdbc:mysql://localhost:3306/demo
+    url: jdbc:mysql://localhost:3306/demodb
     username: root
     password: root
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
   cache:
     type: redis
-  redis:
-    database: 0
-    host: localhost
-    port: 6379
-    password:
-    timeout: 60000
-    ssl: false
+  data:
+    redis:
+      database: 0
+      host: localhost
+      port: 6379
+      password:
+      timeout: 60000
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
 
-app:
-  idempotent:
-    timeout-minutes: 10
-    result-expire-minutes: 1440
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,caches,metrics
+  endpoint:
+    caches:
+      enabled: true

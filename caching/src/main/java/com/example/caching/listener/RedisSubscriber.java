@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
-@Component
 @Slf4j
+@Component
 public class RedisSubscriber implements MessageListener {
+
     @Override
     public void onMessage(Message message, byte[] pattern) {
         var channel = new String(pattern, StandardCharsets.UTF_8);

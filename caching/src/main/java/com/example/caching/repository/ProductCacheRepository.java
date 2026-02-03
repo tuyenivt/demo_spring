@@ -5,9 +5,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,9 +26,6 @@ public interface ProductCacheRepository extends JpaRepository<Product, Long> {
     @Override
     Optional<Product> findById(Long productId);
 
-    @Cacheable(cacheNames = "product", unless = "#result == null", key = "#productId + '_' + #dateOfManufacture")
-    Product findFirstByProductIdAndDateOfManufactureOrderByDateOfManufactureDesc(Long productId, LocalDateTime dateOfManufacture);
-
     @Cacheable(cacheNames = "product_list", unless = "#result == null", key = "'myPrefix_'.concat(#productName)")
-    List<Product> findProductNameInOrderByUpdatedAtDesc(String productName);
+    List<Product> findByProductName(String productName, Sort sort);
 }

@@ -2,14 +2,17 @@
 
 ## Overview
 
-Spring Boot caching demo using Redis as the cache backend. Demonstrates Spring Cache abstraction, direct Redis operations, and the cache-aside pattern with graceful database fallback.
+Spring Boot caching demo using Redis as the cache backend. Demonstrates Spring Cache abstraction, direct Redis operations, cache-aside pattern with graceful database fallback, and REST API endpoints for testing.
 
 ## Tech Stack
 
 - Java 21+
 - Spring Boot
+- Spring Web
 - Spring Data JPA (MySQL)
 - Spring Data Redis
+- Spring Actuator
+- Liquibase
 - Lombok
 
 ## Project Structure
@@ -19,7 +22,14 @@ caching/
 ├── src/main/java/com/example/caching/
 │   ├── MainApplication.java          # Entry point
 │   ├── config/
+│   │   ├── CacheConfig.java          # TTL, serialization, statistics
+│   │   ├── CacheWarmer.java          # Cache warming on startup
 │   │   └── RedisConfig.java          # Redis pub/sub configuration
+│   ├── controller/
+│   │   ├── ProductController.java    # Product CRUD endpoints
+│   │   ├── CacheController.java      # Manual cache operations
+│   │   ├── MessageController.java    # Pub/sub demo endpoint
+│   │   └── UserActivityController.java # Activity tracking endpoint
 │   ├── entity/
 │   │   └── Product.java              # JPA entity (Serializable)
 │   ├── enums/
@@ -48,12 +58,36 @@ caching/
 | `ProductService` | Cache-aside | Try cache first, fallback to database on failure |
 | `UserService` | Direct Redis | Low-level list operations for activity tracking |
 
-### Cache Names
+### Cache Configuration
 
-| Cache | Purpose | Key Pattern |
-|-------|---------|-------------|
-| `product` | Single product lookup | `{id}` or `{id}_{dateOfManufacture}` |
-| `product_list` | Product name search | `myPrefix_{productName}` |
+| Cache | TTL | Purpose |
+|-------|-----|---------|
+| `product` | 1 hour | Single product lookup |
+| `product_list` | 15 minutes | Product name search |
+| default | 30 minutes | Other caches |
+
+### REST Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/products/{id}` | GET | Get product by ID (cached) |
+| `/api/products/search?name=` | GET | Search products by name (cached) |
+| `/api/products` | POST | Create product |
+| `/api/products/{id}` | PUT | Update product |
+| `/api/cache/names` | GET | List all cache names |
+| `/api/cache/{name}` | DELETE | Clear entire cache |
+| `/api/cache/{name}/{key}` | DELETE | Evict specific key |
+| `/api/messages/publish` | POST | Publish message to channel |
+| `/api/users/{id}/activities` | POST | Add user activity |
+| `/api/users/{id}/activities/oldest` | GET | Get oldest activity (FIFO) |
+
+### Actuator Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/actuator/health` | Health check |
+| `/actuator/caches` | Cache statistics |
+| `/actuator/metrics` | Application metrics |
 
 ### Annotations Used
 
@@ -78,32 +112,55 @@ caching/
 ```yaml
 spring:
   cache:
-    type: redis           # Use Redis as cache manager
-  redis:
-    host: localhost
-    port: 6379
-    database: 0
-    timeout: 60000
+    type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,caches,metrics
 ```
 
 ### Dependencies (build.gradle)
 
 ```gradle
+implementation 'org.springframework.boot:spring-boot-starter-web'
 implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+implementation 'org.springframework.boot:spring-boot-starter-actuator'
+implementation 'org.apache.commons:commons-pool2'
+implementation 'org.liquibase:liquibase-core'
 runtimeOnly 'com.mysql:mysql-connector-j'
 ```
 
 ## Redis Features Demonstrated
 
 1. **Spring Cache Abstraction** - Method-level caching via annotations
-2. **Pub/Sub Messaging** - `RedisPublisher` and `RedisSubscriber` on channel `my-channel`
-3. **List Operations** - Activity queue in `UserService` (FIFO pattern)
+2. **TTL Configuration** - Per-cache expiration times
+3. **JSON Serialization** - Human-readable cache values
+4. **Connection Pooling** - Lettuce pool with commons-pool2
+5. **Cache Statistics** - Via actuator endpoint
+6. **Cache Warming** - Pre-populate cache on startup
+7. **Manual Cache Operations** - Programmatic cache access via API
+8. **Pub/Sub Messaging** - `RedisPublisher` and `RedisSubscriber` on channel `my-channel`
+9. **List Operations** - Activity queue in `UserService` (FIFO pattern)
 
 ## Data Flow
 
 ```
-Request → ProductService
+Request → ProductController
+            ↓
+        ProductService
             ↓
         Try: ProductCacheRepository (with @Cacheable)
             ├─ Cache HIT → Return cached data
@@ -117,7 +174,7 @@ Request → ProductService
 
 ## Requirements
 
-- MySQL database `demo` with `product` table
+- MySQL database `demodb` (schema managed by Liquibase)
 - Redis server on `localhost:6379`
 
 ## Running

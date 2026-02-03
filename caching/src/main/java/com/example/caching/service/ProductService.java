@@ -5,9 +5,9 @@ import com.example.caching.repository.ProductCacheRepository;
 import com.example.caching.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,21 +28,12 @@ public class ProductService {
         }
     }
 
-    public Product findFirstByProductIdAndDateOfManufactureOrderByDateOfManufactureDesc(Long productId, LocalDateTime dateOfManufacture) {
+    public List<Product> findByProductNameOrderByUpdatedAtDesc(String productName) {
         try {
-            return productCacheRepository.findFirstByProductIdAndDateOfManufactureOrderByDateOfManufactureDesc(productId, dateOfManufacture);
-        } catch (Exception ex) {
-            log.warn("Can't get Product from cache with id = {}, dateOfManufacture = {}, got from database", productId, dateOfManufacture);
-            return productRepository.findFirstByProductIdAndDateOfManufactureOrderByDateOfManufactureDesc(productId, dateOfManufacture);
-        }
-    }
-
-    public List<Product> findProductNameInOrderByUpdatedAtDesc(String productName) {
-        try {
-            return productCacheRepository.findProductNameInOrderByUpdatedAtDesc(productName);
+            return productCacheRepository.findByProductName(productName, Sort.by("updatedAt").descending());
         } catch (Exception ex) {
             log.warn("Can't get Products from cache with name contain {}, got from database", productName);
-            return productRepository.findProductNameInOrderByUpdatedAtDesc(productName);
+            return productRepository.findByProductName(productName, Sort.by("updatedAt").descending());
         }
     }
 }
