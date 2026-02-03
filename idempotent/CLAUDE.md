@@ -2,7 +2,7 @@
 
 ## Overview
 
-AOP-based idempotency library using Redis for duplicate request detection and response caching.
+AOP-based idempotency library using Redis for duplicate request detection and response caching. Includes demo endpoints showcasing both `@Idempotent` and `@PreventRepeatedRequests` annotations.
 
 ## Architecture
 
@@ -37,6 +37,19 @@ idempotent/
 │   ├── MainApplication.java
 │   ├── config/
 │   │   └── AppConfig.java              # App-level config values
+│   ├── controller/
+│   │   ├── PaymentDemoController.java  # @Idempotent demo
+│   │   ├── OrderDemoController.java    # @Idempotent demo
+│   │   ├── SubscriptionDemoController.java # @PreventRepeatedRequests demo
+│   │   └── IdempotentExceptionHandler.java # Global exception handler
+│   ├── dto/
+│   │   ├── PaymentRequest.java
+│   │   ├── PaymentResponse.java
+│   │   ├── OrderRequest.java
+│   │   ├── OrderResponse.java
+│   │   ├── OrderItem.java
+│   │   ├── SubscribeRequest.java
+│   │   └── ErrorResponse.java
 │   └── idempotent/
 │       ├── Idempotent.java             # Full caching annotation
 │       ├── PreventRepeatedRequests.java # Simple blocking annotation
@@ -44,6 +57,8 @@ idempotent/
 │       ├── IdempotentConfig.java       # Idempotent settings
 │       ├── IdempotentException.java    # Duplicate error
 │       └── IdempotentRedisConfig.java  # Redis cache config
+├── src/test/java/com/example/idempotent/
+│   └── IdempotentIntegrationTest.java  # Testcontainers integration tests
 └── src/main/resources/
     └── application.yml
 ```
@@ -67,7 +82,7 @@ idempotent/
 | Header | Purpose |
 |--------|---------|
 | `Idempotent-Key` | Client-provided unique request identifier |
-| `Idempotent-Replay: true` | Force retrieval of cached result |
+| `Idempotent-Replay: true` | Force re-execution and cache update |
 
 ## Configuration
 
@@ -87,43 +102,67 @@ app:
 - Spring Data Redis
 - Spring Boot Web
 - Lombok
+- Testcontainers (testing)
 
 ## Request Flow
 
 1. **New request**: Execute method → cache result → return
 2. **Duplicate (in progress)**: Return 409 Conflict with TTL info
 3. **Duplicate (completed)**: Return cached result
-4. **Replay header**: Bypass check, return cached result
+4. **Replay header**: Bypass check, execute method, update cache
 
-## Usage Example
+## Demo Endpoints
 
-```java
-@RestController
-public class PaymentController {
+| Endpoint | Method | Annotation | Description |
+|----------|--------|------------|-------------|
+| `/api/demo/payments` | POST | `@Idempotent` | Payment processing with full response caching |
+| `/api/demo/orders` | POST | `@Idempotent` | Order creation with full response caching |
+| `/api/demo/subscriptions` | POST | `@PreventRepeatedRequests` | Newsletter signup with simple duplicate blocking |
 
-    @PostMapping("/payments")
-    @Idempotent  // Full response caching
-    public Payment createPayment(@RequestBody PaymentRequest req) {
-        return paymentService.process(req);
-    }
+### Testing Demo Endpoints
 
-    @PostMapping("/subscribe")
-    @PreventRepeatedRequests  // Simple duplicate blocking
-    public void subscribe(@RequestBody SubscribeRequest req) {
-        subscriptionService.subscribe(req);
-    }
-}
+```bash
+# Payment: First request processes payment
+curl -X POST http://localhost:8080/api/demo/payments \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: payment-123" \
+  -d '{"amount": 100.00, "currency": "USD", "description": "Test payment"}'
+
+# Payment: Duplicate request returns cached result (no double charge)
+curl -X POST http://localhost:8080/api/demo/payments \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: payment-123" \
+  -d '{"amount": 100.00, "currency": "USD", "description": "Test payment"}'
+
+# Order: Create order with idempotency
+curl -X POST http://localhost:8080/api/demo/orders \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: order-456" \
+  -d '{"items": [{"productId": "PROD-001", "productName": "Widget", "quantity": 2, "price": 50.00}], "shippingAddress": "123 Main St"}'
+
+# Subscription: First request succeeds
+curl -X POST http://localhost:8080/api/demo/subscriptions \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: sub-789" \
+  -d '{"email": "test@example.com", "name": "Test User"}'
+
+# Subscription: Duplicate returns 409 Conflict
+curl -X POST http://localhost:8080/api/demo/subscriptions \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: sub-789" \
+  -d '{"email": "test@example.com", "name": "Test User"}'
 ```
 
 ## Error Handling
 
-`IdempotentException` is thrown on duplicates. Handle globally:
+Duplicate requests return HTTP 409 Conflict:
 
-```java
-@ExceptionHandler(IdempotentException.class)
-public ResponseEntity<ErrorResponse> handleIdempotent(IdempotentException ex) {
-    return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse("Duplicate request", ex.getMessage()));
+```json
+{
+  "code": "DUPLICATE_REQUEST",
+  "message": "Request already processed or in progress",
+  "detail": "Repeated requests, previous request expired in 10 minutes",
+  "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
 
@@ -132,4 +171,7 @@ public ResponseEntity<ErrorResponse> handleIdempotent(IdempotentException ex) {
 ```bash
 # Requires Redis running on localhost:6379
 ./gradlew :idempotent:bootRun
+
+# Run integration tests (requires Docker for Testcontainers)
+./gradlew :idempotent:test
 ```

@@ -10,7 +10,7 @@ spring:
     password:
     timeout: 60000
     ssl: false
-    ttl-in-minutes: 86400000
+    ttl: 86400000
 
 app:
   idempotent:
