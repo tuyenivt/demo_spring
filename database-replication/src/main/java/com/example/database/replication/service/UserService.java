@@ -1,10 +1,13 @@
 package com.example.database.replication.service;
 
+import com.example.database.replication.dto.CreateUserRequest;
 import com.example.database.replication.entity.User;
 import com.example.database.replication.repository.read.UserReadRepository;
 import com.example.database.replication.repository.write.UserWriteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -23,7 +26,10 @@ public class UserService {
     private final UserReadRepository readRepository;
 
     @Transactional("writerTransactionManager")
-    public User createUser(User user) {
+    public User createUser(CreateUserRequest request) {
+        var user = new User();
+        user.setName(request.name());
+        user.setEmail(request.email());
         return writeRepository.save(user);
     }
 
@@ -47,6 +53,11 @@ public class UserService {
     @Transactional("readerTransactionManager")
     public List<User> findByName(String name) {
         return readRepository.findByName(name);
+    }
+
+    @Transactional("readerTransactionManager")
+    public Page<User> findAll(Pageable pageable) {
+        return readRepository.findAll(pageable);
     }
 
     @Transactional("writerTransactionManager")
