@@ -2,7 +2,6 @@ package com.example.database.replication.controller;
 
 import com.example.database.replication.dto.CreateUserRequest;
 import com.example.database.replication.dto.UserResponse;
-import com.example.database.replication.entity.User;
 import com.example.database.replication.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

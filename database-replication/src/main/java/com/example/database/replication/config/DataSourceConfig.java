@@ -1,5 +1,7 @@
 package com.example.database.replication.config;
 
+import com.example.database.replication.routing.DataSourceType;
+import com.example.database.replication.routing.RoutingDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
@@ -18,42 +20,74 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Unified datasource configuration using AbstractRoutingDataSource.
+ * Routes between writer and reader datasources based on {@link com.example.database.replication.routing.DataSourceContextHolder}.
+ *
+ * <p>Default routing is to READER datasource. Use {@link com.example.database.replication.routing.UseWriter}
+ * annotation on service methods to route to WRITER datasource.
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.example.database.replication.repository.write",
-        entityManagerFactoryRef = "writerEntityManagerFactory",
-        transactionManagerRef = "writerTransactionManager"
+        basePackages = "com.example.database.replication.repository",
+        entityManagerFactoryRef = "entityManagerFactory",
+        transactionManagerRef = "transactionManager"
 )
-public class WriterDatabaseConfig {
+public class DataSourceConfig {
 
     @Bean
-    @Primary
     @ConfigurationProperties("spring.datasource.writer")
     public DataSource writerDataSource() {
         return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
     @Bean
+    @ConfigurationProperties("spring.datasource.reader")
+    public DataSource readerDataSource() {
+        return DataSourceBuilder.create().type(HikariDataSource.class).build();
+    }
+
+    @Bean
     @Primary
-    public LocalContainerEntityManagerFactoryBean writerEntityManagerFactory(
-            EntityManagerFactoryBuilder builder, @Qualifier("writerDataSource") DataSource dataSource
+    public DataSource routingDataSource(
+            @Qualifier("writerDataSource") DataSource writerDataSource,
+            @Qualifier("readerDataSource") DataSource readerDataSource
+    ) {
+        var routingDataSource = new RoutingDataSource();
+
+        var targetDataSources = new HashMap<>();
+        targetDataSources.put(DataSourceType.WRITER, writerDataSource);
+        targetDataSources.put(DataSourceType.READER, readerDataSource);
+
+        routingDataSource.setTargetDataSources(targetDataSources);
+        routingDataSource.setDefaultTargetDataSource(readerDataSource);
+
+        return routingDataSource;
+    }
+
+    @Bean
+    @Primary
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("routingDataSource") DataSource dataSource
     ) {
         var properties = new HashMap<String, String>();
         properties.put("hibernate.hbm2ddl.auto", "validate");
         return builder
                 .dataSource(dataSource)
                 .packages("com.example.database.replication.entity")
-                .persistenceUnit("writer")
+                .persistenceUnit("routing")
                 .properties(properties)
                 .build();
     }
 
     @Bean
     @Primary
-    public PlatformTransactionManager writerTransactionManager(
-            @Qualifier("writerEntityManagerFactory") EntityManagerFactory entityManagerFactory
+    public PlatformTransactionManager transactionManager(
+            @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory
     ) {
         return new JpaTransactionManager(entityManagerFactory);
     }
