@@ -27,7 +27,7 @@ This project showcases how to implement database replication in a Spring applica
 
 ## Tech Stack
 
-- Java 21+
+- Java 25+
 - Spring Boot 3.x
 - Spring Data JPA
 - MySQL 8.4 (GTID replication)
@@ -89,10 +89,32 @@ docker compose down --volumes --remove-orphans
 
 ## Key Concepts
 
-### Read-Write Separation
+### Read-Write Separation with @UseWriter
 
-- **WriterDatabaseConfig**: Configures the master datasource with its own `EntityManagerFactory` and `TransactionManager`
-- **ReaderDatabaseConfig**: Configures the replica datasource as read-only
+The application uses `AbstractRoutingDataSource` with annotation-based routing:
+
+- **@UseWriter annotation**: Mark service methods that require write operations
+- **UseWriterAspect**: Intercepts `@UseWriter` methods and routes to the master datasource
+- **Default routing**: All operations route to the replica (reader) by default
+- **DataSourceContextHolder**: Uses `ScopedValue` for thread-safe, virtual-thread-compatible context
+
+```java
+@Service
+@Transactional(readOnly = true)
+public class UserService {
+
+    @UseWriter
+    @Transactional
+    public User createUser(CreateUserRequest request) {
+        return userRepository.save(user);
+    }
+
+    // No annotation - routes to replica
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+}
+```
 
 ### GTID Replication
 
@@ -120,7 +142,7 @@ When creating a user, the service reads immediately from the master to ensure th
 **CreateUserRequest**:
 ```json
 {
-  "name": "John Doe",        // required
+  "name": "John Doe",         // required
   "email": "john@example.com" // required, valid email
 }
 ```
