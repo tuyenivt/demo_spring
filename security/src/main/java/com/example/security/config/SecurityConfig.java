@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -15,12 +17,26 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Bean // configure users
-    public UserDetailsService userDetailsService() {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         return new InMemoryUserDetailsManager(
-                User.withUsername("john").password("123").roles("EMPLOYEE").build(),
-                User.withUsername("peter").password("123").roles("EMPLOYEE", "MANAGER").build(),
-                User.withUsername("frank").password("123").roles("EMPLOYEE", "ADMIN").build()
+                User.withUsername("john")
+                        .password(encoder.encode("123"))
+                        .roles("EMPLOYEE")
+                        .build(),
+                User.withUsername("peter")
+                        .password(encoder.encode("123"))
+                        .roles("EMPLOYEE", "MANAGER")
+                        .build(),
+                User.withUsername("frank")
+                        .password(encoder.encode("123"))
+                        .roles("EMPLOYEE", "ADMIN")
+                        .build()
         );
     }
 
