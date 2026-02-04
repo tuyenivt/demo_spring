@@ -46,6 +46,11 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
+                .sessionManagement(session -> session
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                        .expiredUrl("/my-login/?expired")
+                )
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/access-denied")
                 )
