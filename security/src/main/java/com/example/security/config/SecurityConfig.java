@@ -51,6 +51,10 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(false)
                         .expiredUrl("/my-login/?expired")
                 )
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
+                )
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/access-denied")
                 )
