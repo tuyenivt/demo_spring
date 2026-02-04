@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/leaders")
 public class LeadersController {
 
-	@GetMapping("/")
-	public String index() {
-		return "leaders/index";
-	}
+    @GetMapping("/")
+    public String index() {
+        return "leaders/index";
+    }
 }

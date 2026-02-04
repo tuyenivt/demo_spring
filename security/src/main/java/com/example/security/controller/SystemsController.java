@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/systems")
 public class SystemsController {
 
-	@GetMapping("/")
-	public String index() {
-		return "systems/index";
-	}
+    @GetMapping("/")
+    public String index() {
+        return "systems/index";
+    }
 }
