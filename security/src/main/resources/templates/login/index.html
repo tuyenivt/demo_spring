@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>Login Page</title>
+    <title>Login Page</title>
 </head>
 <body>
-    <h1>Welcome to login page</h1>
-    <p th:if="${param.error}" class="error" style="color: red">Wrong user or password</p>
-    <!--/* ${pageContent.request.contextPath}/authenticateTheUser */-->
-    <form action="#" th:action="@{/my-authenticate}" method="post">
-        <!--/* <input type="hidden" th:name="${_csrf.parameterName}" th:value=${_csrf.token}/> */-->
+<h1>Welcome to login page</h1>
+<p th:if="${param.error}" style="color: red">Wrong user or password</p>
+<p th:if="${param.logout}" style="color: green">You have been logged out</p>
+<p th:if="${param.expired}" style="color: orange">Your session has expired. Please log in again.</p>
+
+<form th:action="@{/my-authenticate}" method="post">
+    <div>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username">
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
         <label for="password">Password</label>
-        <input type="password" id="password" name="password">
-        <button type="submit">Login</button>
-    </form>
-    <p th:if="${param.logout}">You have been logged out</p>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+        <label>
+            <input type="checkbox" name="remember-me"> Remember me
+        </label>
+    </div>
+    <button type="submit">Login</button>
+</form>
 </body>
 </html>
