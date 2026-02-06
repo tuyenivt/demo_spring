@@ -113,7 +113,12 @@ public class TemporalConfig {
     public WorkerFactory workerFactory(WorkflowClient workflowClient, OrderActivitiesImpl orderActivities, PaymentActivitiesImpl paymentActivities) {
         workerFactory = WorkerFactory.newInstance(workflowClient, WorkerFactoryOptions.newBuilder().setUsingVirtualWorkflowThreads(true).build());
 
-        var workerOptions = WorkerOptions.newBuilder().setStickyTaskQueueDrainTimeout(Duration.ofSeconds(temporalProperties.getShutdownTimeoutSeconds())).build();
+        var workerOptions = WorkerOptions.newBuilder()
+                .setStickyTaskQueueDrainTimeout(Duration.ofSeconds(temporalProperties.getShutdownTimeoutSeconds()))
+                // Rate limiting for activities - prevents overwhelming external services
+                .setMaxConcurrentActivityExecutionSize(10)  // Max concurrent activities
+                .setMaxConcurrentWorkflowTaskExecutionSize(20)  // Max concurrent workflow tasks
+                .build();
 
         // Create worker for order processing task queue
         var worker = workerFactory.newWorker(temporalProperties.getTaskQueue(), workerOptions);
