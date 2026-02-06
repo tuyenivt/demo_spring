@@ -82,6 +82,22 @@ public class OrderActivitiesImpl implements OrderActivities {
     }
 
     @Override
+    public void releaseInventory(String orderId, int quantity) {
+        log.info("Releasing inventory: orderId={}, quantity={}", orderId, quantity);
+
+        // Simulate releasing previously reserved inventory
+        // In production: update database to release reservation
+
+        // Simulate occasional failure
+        if (random.nextInt(10) < 1) { // 10% chance
+            log.warn("Transient inventory release failure - will be retried");
+            throw new OrderActivitiesException("Inventory system temporarily unavailable");
+        }
+
+        log.info("Inventory released successfully");
+    }
+
+    @Override
     public void sendNotification(String customerId, String message) {
         log.info("Sending notification: customerId={}, message={}", customerId, message);
 

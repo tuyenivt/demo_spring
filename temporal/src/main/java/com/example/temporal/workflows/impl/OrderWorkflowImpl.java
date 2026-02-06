@@ -1,17 +1,22 @@
 package com.example.temporal.workflows.impl;
 
 import com.example.temporal.activities.OrderActivities;
+import com.example.temporal.activities.PaymentActivities;
 import com.example.temporal.workflows.InventoryChildWorkflow;
 import com.example.temporal.workflows.OrderWorkflow;
 import com.example.temporal.workflows.PaymentChildWorkflow;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
+import io.temporal.common.SearchAttributeKey;
 import io.temporal.failure.ActivityFailure;
 import io.temporal.workflow.ChildWorkflowOptions;
 import io.temporal.workflow.Workflow;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation of the main order processing workflow.
@@ -25,51 +30,46 @@ import java.time.Duration;
  * - Use Workflow.sleep() instead of Thread.sleep()
  * - Use Workflow.currentTimeMillis() instead of System.currentTimeMillis()
  * <p>
- * 2. ACTIVITY RETRY vs WORKFLOW RETRY
- * - Activity Retry: Retries individual activity executions (configured in ActivityOptions)
- * - Workflow Retry: Retries the entire workflow if it fails (configured when starting workflow)
- * - Activities handle transient failures (network issues, temporary service outages)
- * - Workflow retry handles workflow-level failures (unhandled exceptions, timeouts)
+ * 2. SAGA PATTERN
+ * - Compensations are registered after each successful step
+ * - On failure, compensations execute in reverse order
+ * - Ensures data consistency across distributed services
  * <p>
- * 3. CHILD WORKFLOWS
- * - Used for complex sub-processes that need their own lifecycle
- * - Can be versioned independently
- * - Have their own retry policies
- * - Useful for reusable business processes
+ * 3. SIGNALS AND QUERIES
+ * - Signals allow external input during workflow execution
+ * - Queries allow reading workflow state without affecting execution
+ * <p>
+ * 4. SEARCH ATTRIBUTES
+ * - Custom attributes for workflow discovery in Temporal UI
+ * - Enable filtering workflows by business data
+ * <p>
+ * 5. WORKFLOW VERSIONING
+ * - Workflow.getVersion() for backward-compatible changes
+ * - Safe deployments without breaking running workflows
  */
 @Slf4j
 public class OrderWorkflowImpl implements OrderWorkflow {
+
+    // Search attribute keys for workflow filtering
+    private static final SearchAttributeKey<String> CUSTOMER_ID_KEY = SearchAttributeKey.forKeyword("CustomerId");
+    private static final SearchAttributeKey<Long> ORDER_AMOUNT_KEY = SearchAttributeKey.forLong("OrderAmount");
+    private static final SearchAttributeKey<String> ORDER_STATUS_KEY = SearchAttributeKey.forKeyword("OrderStatus");
+
     /**
      * Activity options with retry policy.
-     * <p>
-     * ACTIVITY RETRY POLICY:
-     * - Initial interval: 1 second
-     * - Backoff coefficient: 2.0 (exponential backoff)
-     * - Maximum interval: 10 seconds
-     * - Maximum attempts: 3
-     * <p>
-     * This means:
-     * - Attempt 1: Immediate
-     * - Attempt 2: After 1 second
-     * - Attempt 3: After 2 seconds
-     * - If all fail, activity throws ActivityFailure
      */
     private final ActivityOptions activityOptions = ActivityOptions.newBuilder()
-            .setStartToCloseTimeout(Duration.ofSeconds(30)) // Max time for activity to complete
+            .setStartToCloseTimeout(Duration.ofSeconds(30))
             .setRetryOptions(RetryOptions.newBuilder()
                     .setInitialInterval(Duration.ofSeconds(1))
                     .setBackoffCoefficient(2.0)
                     .setMaximumInterval(Duration.ofSeconds(10))
-                    .setMaximumAttempts(3) // Total attempts (initial + 2 retries)
+                    .setMaximumAttempts(3)
                     .build())
             .build();
 
     /**
      * Child workflow options with retry policy.
-     * <p>
-     * CHILD WORKFLOW RETRY POLICY:
-     * - Similar to activity retry, but for entire child workflow execution
-     * - If child workflow fails after retries, parent workflow can handle the failure
      */
     private final ChildWorkflowOptions childWorkflowOptions = ChildWorkflowOptions.newBuilder()
             .setWorkflowExecutionTimeout(Duration.ofMinutes(5))
@@ -80,61 +80,226 @@ public class OrderWorkflowImpl implements OrderWorkflow {
                     .build())
             .build();
 
-    // Activity stub - proxy for executing activities
+    // Activity stubs
     private final OrderActivities activities = Workflow.newActivityStub(OrderActivities.class, activityOptions);
+    private final PaymentActivities paymentActivities = Workflow.newActivityStub(PaymentActivities.class, activityOptions);
+
+    // Saga compensations list
+    private final List<Runnable> compensations = new ArrayList<>();
+
+    // Workflow state for signals and queries
+    private OrderStatus status = OrderStatus.PENDING;
+    private boolean cancelled = false;
+    private String cancellationReason;
+    private String shippingAddress;
+
+    // Store payment auth for compensation
+    private String paymentAuthId;
 
     @Override
     public String processOrder(String orderId, String customerId, long amount) {
-        log.info("Starting order processing for orderId={}, customerId={}, amount={}",
-                orderId, customerId, amount);
+        log.info("Starting order processing for orderId={}, customerId={}, amount={}", orderId, customerId, amount);
+
+        // Set search attributes for workflow discovery
+        updateSearchAttributes(customerId, amount, "PROCESSING");
 
         try {
             // Step 1: Validate order (Activity)
-            // This activity has retry policy from activityOptions
+            status = OrderStatus.VALIDATING;
+            updateSearchAttributes(customerId, amount, status.name());
             log.info("Step 1: Validating order");
+
+            // Version 1: Original validation
+            // Version 2: Added fraud check before validation
+            int version = Workflow.getVersion("FraudCheck", Workflow.DEFAULT_VERSION, 2);
+            if (version >= 2) {
+                log.info("Performing fraud check (v2 feature)");
+                // In production: activities.checkFraud(customerId, amount);
+            }
+
             activities.validateOrder(orderId, amount);
             log.info("Order validation completed successfully");
 
-            // Step 2: Process payment via Child Workflow
-            // Child workflows are useful for complex sub-processes
-            // They have their own execution history and can be versioned independently
-            log.info("Step 2: Processing payment");
-            var paymentWorkflow = Workflow.newChildWorkflowStub(PaymentChildWorkflow.class, childWorkflowOptions);
+            // Check for cancellation signal
+            if (cancelled) {
+                return handleCancellation(orderId);
+            }
 
+            // Step 2: Process payment via Child Workflow
+            status = OrderStatus.PROCESSING_PAYMENT;
+            updateSearchAttributes(customerId, amount, status.name());
+            log.info("Step 2: Processing payment");
+
+            var paymentWorkflow = Workflow.newChildWorkflowStub(PaymentChildWorkflow.class, childWorkflowOptions);
             var paymentResult = paymentWorkflow.processPayment(orderId, customerId, amount);
             log.info("Payment processing completed: {}", paymentResult);
 
-            // Step 3: Reserve inventory via Child Workflow
-            log.info("Step 3: Reserving inventory");
-            var inventoryWorkflow = Workflow.newChildWorkflowStub(InventoryChildWorkflow.class, childWorkflowOptions);
+            // Extract auth ID for potential refund (saga compensation)
+            paymentAuthId = extractAuthId(paymentResult);
 
+            // Register compensation for payment
+            final var authIdForCompensation = paymentAuthId;
+            final var amountForCompensation = amount;
+            compensations.add(() -> {
+                log.info("Saga compensation: Refunding payment authId={}", authIdForCompensation);
+                paymentActivities.refundPayment(authIdForCompensation, amountForCompensation);
+            });
+
+            // Check for cancellation signal
+            if (cancelled) {
+                compensate();
+                return handleCancellation(orderId);
+            }
+
+            // Step 3: Reserve inventory via Child Workflow
+            status = OrderStatus.RESERVING_INVENTORY;
+            updateSearchAttributes(customerId, amount, status.name());
+            log.info("Step 3: Reserving inventory");
+
+            var inventoryWorkflow = Workflow.newChildWorkflowStub(
+                    InventoryChildWorkflow.class, childWorkflowOptions);
             var inventoryResult = inventoryWorkflow.reserveInventory(orderId, 1);
             log.info("Inventory reservation completed: {}", inventoryResult);
 
+            // Register compensation for inventory
+            final String orderIdForCompensation = orderId;
+            compensations.add(() -> {
+                log.info("Saga compensation: Releasing inventory orderId={}", orderIdForCompensation);
+                activities.releaseInventory(orderIdForCompensation, 1);
+            });
+
+            // Check for cancellation signal
+            if (cancelled) {
+                compensate();
+                return handleCancellation(orderId);
+            }
+
             // Step 4: Send confirmation notification (Activity)
+            status = OrderStatus.SENDING_NOTIFICATION;
+            updateSearchAttributes(customerId, amount, status.name());
             log.info("Step 4: Sending confirmation");
-            activities.sendNotification(customerId, "Order " + orderId + " confirmed!");
+
+            var notificationMessage = "Order " + orderId + " confirmed!";
+            if (shippingAddress != null) {
+                notificationMessage += " Shipping to: " + shippingAddress;
+            }
+            activities.sendNotification(customerId, notificationMessage);
             log.info("Notification sent successfully");
+
+            // Success - clear compensations (no longer needed)
+            compensations.clear();
+
+            status = OrderStatus.COMPLETED;
+            updateSearchAttributes(customerId, amount, status.name());
 
             var result = "Order " + orderId + " processed successfully";
             log.info("Order processing completed: {}", result);
             return result;
 
         } catch (ActivityFailure e) {
-            // Activity failed after all retries
-            // This demonstrates ACTIVITY RETRY failure
             log.error("Activity failed after retries for orderId={}: {}", orderId, e.getMessage());
+            status = OrderStatus.FAILED;
+            updateSearchAttributes(customerId, amount, status.name());
 
-            // In production, you might want to:
-            // 1. Execute compensation activities (refund, release inventory)
-            // 2. Send alerts
-            // 3. Update order status to "failed"
-            throw e; // Re-throw to fail the workflow
-        } catch (Exception e) {
-            // Other workflow failures
-            // If workflow retry policy is configured, the entire workflow will retry
-            log.error("Workflow failed for orderId={}: {}", orderId, e.getMessage());
+            // Execute saga compensations
+            compensate();
+
             throw e;
+        } catch (Exception e) {
+            log.error("Workflow failed for orderId={}: {}", orderId, e.getMessage());
+            status = OrderStatus.FAILED;
+            updateSearchAttributes(customerId, amount, status.name());
+
+            // Execute saga compensations
+            compensate();
+
+            throw e;
+        }
+    }
+
+    @Override
+    public void cancelOrder(String reason) {
+        log.info("Received cancel signal with reason: {}", reason);
+        this.cancelled = true;
+        this.cancellationReason = reason;
+    }
+
+    @Override
+    public void updateShippingAddress(String newAddress) {
+        log.info("Received shipping address update: {}", newAddress);
+        this.shippingAddress = newAddress;
+    }
+
+    @Override
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    @Override
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    /**
+     * Execute saga compensations in reverse order.
+     */
+    private void compensate() {
+        if (compensations.isEmpty()) {
+            log.info("No compensations to execute");
+            return;
+        }
+
+        log.info("Executing {} saga compensations in reverse order", compensations.size());
+        Collections.reverse(compensations);
+
+        for (Runnable compensation : compensations) {
+            try {
+                compensation.run();
+            } catch (Exception e) {
+                // Log but continue with other compensations
+                log.error("Compensation failed: {}", e.getMessage());
+            }
+        }
+
+        compensations.clear();
+        log.info("Saga compensations completed");
+    }
+
+    /**
+     * Handle order cancellation.
+     */
+    private String handleCancellation(String orderId) {
+        status = OrderStatus.CANCELLED;
+        var message = "Order " + orderId + " cancelled: " + cancellationReason;
+        log.info(message);
+        return message;
+    }
+
+    /**
+     * Extract authorization ID from payment result.
+     */
+    private String extractAuthId(String paymentResult) {
+        // Payment result format: "Payment successful: AUTH-XXXXXXXX"
+        if (paymentResult != null && paymentResult.contains("AUTH-")) {
+            int start = paymentResult.indexOf("AUTH-");
+            return paymentResult.substring(start);
+        }
+        return "UNKNOWN";
+    }
+
+    /**
+     * Update search attributes for workflow discovery.
+     */
+    private void updateSearchAttributes(String customerId, long amount, String statusValue) {
+        try {
+            Workflow.upsertTypedSearchAttributes(
+                    CUSTOMER_ID_KEY.valueSet(customerId),
+                    ORDER_AMOUNT_KEY.valueSet(amount),
+                    ORDER_STATUS_KEY.valueSet(statusValue)
+            );
+        } catch (Exception e) {
+            // Search attributes may not be configured - log and continue
+            log.debug("Could not update search attributes: {}", e.getMessage());
         }
     }
 }

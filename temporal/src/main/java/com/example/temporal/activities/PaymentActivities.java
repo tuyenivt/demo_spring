@@ -22,4 +22,10 @@ public interface PaymentActivities {
      */
     @ActivityMethod
     void capturePayment(String authorizationId, long amount);
+
+    /**
+     * Refunds a captured payment (saga compensation).
+     */
+    @ActivityMethod
+    void refundPayment(String authorizationId, long amount);
 }

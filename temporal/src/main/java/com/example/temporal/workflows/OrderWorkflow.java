@@ -1,5 +1,7 @@
 package com.example.temporal.workflows;
 
+import io.temporal.workflow.QueryMethod;
+import io.temporal.workflow.SignalMethod;
 import io.temporal.workflow.WorkflowInterface;
 import io.temporal.workflow.WorkflowMethod;
 
@@ -11,6 +13,9 @@ import io.temporal.workflow.WorkflowMethod;
  * - Must be deterministic - same input always produces same output
  * - Cannot perform I/O operations directly (must use Activities)
  * - Can orchestrate Activities and Child Workflows
+ * <p>
+ * SIGNALS: Async messages to running workflow to modify state
+ * QUERIES: Read-only access to workflow state without affecting execution
  */
 @WorkflowInterface
 public interface OrderWorkflow {
@@ -25,4 +30,60 @@ public interface OrderWorkflow {
      */
     @WorkflowMethod
     String processOrder(String orderId, String customerId, long amount);
+
+    /**
+     * Signal to cancel the order.
+     * <p>
+     * TEMPORAL CONCEPT: Signals
+     * - Async messages sent to running workflow
+     * - Can modify workflow state
+     * - Workflow checks for signals between steps
+     *
+     * @param reason Reason for cancellation
+     */
+    @SignalMethod
+    void cancelOrder(String reason);
+
+    /**
+     * Signal to update shipping address.
+     *
+     * @param newAddress New shipping address
+     */
+    @SignalMethod
+    void updateShippingAddress(String newAddress);
+
+    /**
+     * Query current order status.
+     * <p>
+     * TEMPORAL CONCEPT: Queries
+     * - Read-only access to workflow state
+     * - Does not affect workflow execution
+     * - Can be called anytime during workflow lifecycle
+     *
+     * @return Current order status
+     */
+    @QueryMethod
+    OrderStatus getStatus();
+
+    /**
+     * Query current shipping address.
+     *
+     * @return Current shipping address or null if not set
+     */
+    @QueryMethod
+    String getShippingAddress();
+
+    /**
+     * Order status enum for tracking workflow progress.
+     */
+    enum OrderStatus {
+        PENDING,
+        VALIDATING,
+        PROCESSING_PAYMENT,
+        RESERVING_INVENTORY,
+        SENDING_NOTIFICATION,
+        COMPLETED,
+        CANCELLED,
+        FAILED
+    }
 }

@@ -30,9 +30,15 @@ public class PaymentChildWorkflowImpl implements PaymentChildWorkflow {
      * - Rate limiting
      * <p>
      * Retry policy handles these gracefully.
+     * <p>
+     * HEARTBEAT TIMEOUT:
+     * - Activities must heartbeat within this interval
+     * - If no heartbeat received, Temporal considers activity failed
+     * - Enables early detection of stuck activities
      */
     private final ActivityOptions paymentActivityOptions = ActivityOptions.newBuilder()
             .setStartToCloseTimeout(Duration.ofSeconds(30))
+            .setHeartbeatTimeout(Duration.ofSeconds(10)) // Activity heartbeat every 10s
             .setRetryOptions(RetryOptions.newBuilder()
                     .setInitialInterval(Duration.ofSeconds(2))
                     .setBackoffCoefficient(2.0)

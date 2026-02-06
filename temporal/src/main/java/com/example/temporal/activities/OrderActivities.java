@@ -59,6 +59,13 @@ public interface OrderActivities {
     void reserveInventory(String orderId, int quantity);
 
     /**
+     * Releases previously reserved inventory (saga compensation).
+     * In production: update inventory database to release reservation.
+     */
+    @ActivityMethod
+    void releaseInventory(String orderId, int quantity);
+
+    /**
      * Sends notification to customer.
      * In production: send email, SMS, or push notification.
      */
