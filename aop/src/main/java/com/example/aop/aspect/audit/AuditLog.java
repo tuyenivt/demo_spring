@@ -1,4 +1,4 @@
-package com.example.aop.aspect;
+package com.example.aop.aspect.audit;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +13,6 @@ import java.time.Instant;
 @Builder
 @ToString
 public class AuditLog {
-
     private final Instant timestamp;
     private final String user;
     private final String action;

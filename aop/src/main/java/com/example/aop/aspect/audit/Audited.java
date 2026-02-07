@@ -1,14 +1,12 @@
-package com.example.aop.aspect;
+package com.example.aop.aspect.audit;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation to mark methods for audit trail logging.
  * Use this to track data modifications for compliance purposes.
  */
+@Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Audited {

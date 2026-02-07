@@ -5,14 +5,14 @@ import com.example.aop.dao.AccountDao;
 import com.example.aop.entity.Account;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class Service {
+public class AccountService {
 
     private final AccountDao accountDao;
 
@@ -41,5 +41,19 @@ public class Service {
 
     public void deleteAccount(int id) {
         accountDao.delete(id);
+    }
+
+    /**
+     * Demonstrates the Spring AOP self-invocation proxy limitation.
+     * The internal call to serve() bypasses the proxy, so @LogExecutionTime
+     * will NOT fire. This is because Spring AOP is proxy-based — "this.serve()"
+     * calls the target object directly, not through the AOP proxy.
+     * <p>
+     * Workarounds: inject self, use AopContext.currentProxy(), or move the
+     * method to a separate bean.
+     */
+    public void processBatch(int factor) throws InterruptedException {
+        log.info("processBatch - calling serve() internally (aspect will NOT fire)");
+        serve(factor); // self-invocation — bypasses proxy
     }
 }

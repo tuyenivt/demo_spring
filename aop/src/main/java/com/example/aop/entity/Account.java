@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
-
     private int id;
     private String name;
-
-    @Override
-    public String toString() {
-        return "Account [id=" + id + ", name=" + name + "]";
-    }
 }
