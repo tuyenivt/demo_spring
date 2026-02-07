@@ -5,25 +5,34 @@ import com.example.ai.dto.QuestionRequest;
 import com.example.ai.service.OllamaService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+@Validated
 @RestController
+@RequestMapping("/question")
 @RequiredArgsConstructor
 public class OllamaController {
     private final OllamaService service;
 
-    @PostMapping("/question/{userId}")
+    @PostMapping("/{userId}")
     @RateLimiter(name = "questionApi", fallbackMethod = "rateLimitFallback")
-    public AnswerResponse question(@PathVariable String userId, @RequestBody @Valid QuestionRequest request) {
+    public AnswerResponse question(
+            @PathVariable @Size(min = 1, max = 100) String userId,
+            @RequestBody @Valid QuestionRequest request) {
         return new AnswerResponse(service.getAnswer(userId, request.question()), userId);
     }
 
-    @GetMapping(value = "/question/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @RateLimiter(name = "questionApi", fallbackMethod = "streamRateLimitFallback")
-    public Flux<String> streamQuestion(@PathVariable String userId, @RequestParam String question) {
+    public Flux<String> streamQuestion(
+            @PathVariable @Size(min = 1, max = 100) String userId,
+            @RequestParam @NotBlank @Size(max = 2000) String question) {
         return service.streamAnswer(userId, question);
     }
 

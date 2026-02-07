@@ -46,7 +46,7 @@ class OllamaControllerIntegrationTest {
     @Test
     void shouldClearConversation() throws Exception {
         mockMvc.perform(delete("/conversations/test_user"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

@@ -5,18 +5,20 @@ This is a demo AI-powered customer support chatbot designed to assist users with
 
 ## Features
 - Integration with **Ollama**, utilizing the **LLaMA 3.1** language model
-- Predefined system prompts to guide chatbot behavior and maintain consistent tone
+- Externalised system prompt (`prompts/system-prompt.st`) — editable without recompiling
 - Persistent **ChatMemory** to enable contextual, multi-turn conversations
 - **Qdrant** used as a vector store for semantic search and retrieval
 - Retrieval-Augmented Generation (RAG) powered by **QuestionAnswerAdvisor** for more accurate and context-aware responses
-- **Request/Response DTOs** with input validation
+- Idempotent RAG document loading — avoids duplicates on restart
+- **Request/Response DTOs** with input validation on all endpoints
 - **Streaming responses** via Server-Sent Events (SSE)
 - **Conversation history** endpoint to retrieve past messages
 - **Document management** endpoint for adding RAG documents
 - **Rate limiting** with Resilience4j
 - **Health checks** for Ollama service via Spring Actuator
-- **Observability** with Micrometer metrics
+- **Observability** with Micrometer metrics and structured logging
 - **Integration tests** with Testcontainers
+- **Unit tests** with `@WebMvcTest` and Mockito for fast feedback
 
 ## Start Ollama
 ```bash
@@ -68,6 +70,11 @@ curl -X DELETE http://localhost:8080/conversations/test_user
 curl -X POST http://localhost:8080/admin/documents \
      -H "Content-Type: application/json" \
      -d '{"content": "New policy information here", "metadata": {"source": "admin"}}'
+```
+
+### Delete Document
+```bash
+curl -X DELETE http://localhost:8080/admin/documents/{id}
 ```
 
 ### Health Check
