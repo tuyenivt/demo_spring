@@ -5,19 +5,28 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.MDC;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 /**
- * Enhanced logging aspect with correlation IDs for request tracing.
- * Intercepts all methods in classes annotated with @RestController.
+ * Controller logging aspect with correlation IDs for distributed tracing.
+ * Automatically intercepts all @RestController methods to provide:
+ * - Unique correlation ID per request (propagated via MDC)
+ * - Entry/exit logging with arguments and results
+ * - Request duration tracking
+ * - Exception logging with timing
+ * <p>
+ * This aspect is specifically for the web layer. For business logic logging,
+ * use @ExecutionLogging annotation with ExecutionLoggingAspect.
  */
 @Slf4j
 @Aspect
+@Order(1)
 @Component
-public class LoggingAspect {
+public class ControllerLoggingAspect {
     private static final String CORRELATION_ID_KEY = "correlationId";
 
     @Around("@within(org.springframework.web.bind.annotation.RestController)")

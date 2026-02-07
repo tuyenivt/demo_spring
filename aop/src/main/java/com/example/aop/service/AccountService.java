@@ -1,6 +1,7 @@
 package com.example.aop.service;
 
-import com.example.aop.aspect.LogExecutionTime;
+import com.example.aop.aspect.ExecutionLogging;
+import com.example.aop.aspect.MonitorPerformance;
 import com.example.aop.dao.AccountDao;
 import com.example.aop.entity.Account;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,8 @@ public class AccountService {
 
     private final AccountDao accountDao;
 
-    @LogExecutionTime
+    @ExecutionLogging
+    @MonitorPerformance(thresholdMs = 500)
     public void serve(int factor) throws InterruptedException {
         Thread.sleep(factor * 1000L);
     }
@@ -45,7 +47,7 @@ public class AccountService {
 
     /**
      * Demonstrates the Spring AOP self-invocation proxy limitation.
-     * The internal call to serve() bypasses the proxy, so @LogExecutionTime
+     * The internal call to serve() bypasses the proxy, so @ExecutionLogging
      * will NOT fire. This is because Spring AOP is proxy-based — "this.serve()"
      * calls the target object directly, not through the AOP proxy.
      * <p>
