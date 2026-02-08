@@ -1,6 +1,7 @@
 package com.example.database.replication.service;
 
 import com.example.database.replication.dto.CreateUserRequest;
+import com.example.database.replication.dto.UpdateUserRequest;
 import com.example.database.replication.entity.User;
 import com.example.database.replication.repository.UserRepository;
 import com.example.database.replication.routing.UseWriter;
@@ -59,6 +60,16 @@ public class UserService {
 
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
+    }
+
+    @UseWriter
+    @Transactional
+    public User updateUser(Long id, UpdateUserRequest request) {
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("User with id " + id + " not found"));
+        user.setName(request.name());
+        user.setEmail(request.email());
+        return userRepository.save(user);
     }
 
     @UseWriter

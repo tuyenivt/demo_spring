@@ -1,6 +1,7 @@
 package com.example.database.replication.controller;
 
 import com.example.database.replication.dto.CreateUserRequest;
+import com.example.database.replication.dto.UpdateUserRequest;
 import com.example.database.replication.dto.UserResponse;
 import com.example.database.replication.service.UserService;
 import jakarta.validation.Valid;
@@ -41,6 +42,12 @@ public class UserController {
     @GetMapping("/name/{name}")
     public ResponseEntity<List<UserResponse>> getByName(@PathVariable String name) {
         return ResponseEntity.ok(userService.findByName(name).stream().map(UserResponse::from).toList());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
+        var updated = userService.updateUser(id, request);
+        return ResponseEntity.ok(UserResponse.from(updated));
     }
 
     @DeleteMapping("/{id}")
