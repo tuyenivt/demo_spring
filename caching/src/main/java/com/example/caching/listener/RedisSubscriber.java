@@ -13,7 +13,7 @@ public class RedisSubscriber implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        var channel = new String(pattern, StandardCharsets.UTF_8);
+        var channel = new String(message.getChannel(), StandardCharsets.UTF_8);
         var msg = new String(message.getBody(), StandardCharsets.UTF_8);
         log.info("Received message: {} from channel: {}", msg, channel);
         // Add your business logic here
