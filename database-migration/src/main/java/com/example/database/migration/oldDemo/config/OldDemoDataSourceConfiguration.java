@@ -1,5 +1,6 @@
 package com.example.database.migration.oldDemo.config;
 
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -12,10 +13,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -27,7 +26,7 @@ import java.util.Map;
 public class OldDemoDataSourceConfiguration {
 
     @Bean
-    @ConfigurationProperties(prefix = "oldDemo.datasource")
+    @ConfigurationProperties(prefix = "old-demo.datasource")
     public DataSource oldDemoDataSource() {
         return DataSourceBuilder.create().build();
     }
@@ -37,7 +36,7 @@ public class OldDemoDataSourceConfiguration {
             EntityManagerFactoryBuilder builder,
             @Qualifier("oldDemoDataSource") DataSource dataSource
     ) {
-        Map<String, String> properties = new HashMap<>();
+        var properties = new HashMap<String, String>();
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         return builder
                 .dataSource(dataSource)

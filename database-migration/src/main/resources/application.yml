@@ -1,8 +1,12 @@
 spring:
   application:
     name: database-migration
+  flyway:
+    enabled: true
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -20,8 +24,8 @@ demo:
     platform: mysql
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://localhost:3307/demo
-    username: root
-    password: root
+    username: ${DEMO_DB_USERNAME:root}
+    password: ${DEMO_DB_PASSWORD:root}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -34,8 +38,8 @@ old-demo:
     platform: mysql
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://localhost:3306/demo
-    username: root
-    password: root
+    username: ${OLD_DEMO_DB_USERNAME:root}
+    password: ${OLD_DEMO_DB_PASSWORD:root}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
