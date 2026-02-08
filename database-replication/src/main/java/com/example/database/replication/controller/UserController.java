@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,10 +23,8 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
         var saved = userService.createUser(request);
-        var afterWrite = userService.findByIdAfterWrite(saved.getId());
-        return afterWrite
-                .map(u -> ResponseEntity.ok(UserResponse.from(u)))
-                .orElse(ResponseEntity.notFound().build());
+        var response = UserResponse.from(saved);
+        return ResponseEntity.created(URI.create("/users/" + response.id())).body(response);
     }
 
     @GetMapping

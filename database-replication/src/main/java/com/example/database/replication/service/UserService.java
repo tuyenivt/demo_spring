@@ -64,6 +64,9 @@ public class UserService {
     @UseWriter
     @Transactional
     public void deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("User with id " + id + " not found");
+        }
         userRepository.deleteById(id);
     }
 }

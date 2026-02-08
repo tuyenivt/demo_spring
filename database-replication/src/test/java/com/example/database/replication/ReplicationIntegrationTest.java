@@ -49,14 +49,14 @@ class ReplicationIntegrationTest {
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var createResponse = restTemplate.postForEntity("/users", request, UserResponse.class);
 
-        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(createResponse.getBody()).isNotNull();
         assertThat(createResponse.getBody().name()).isEqualTo("John Doe");
         assertThat(createResponse.getBody().email()).isEqualTo("john@example.com");
         assertThat(createResponse.getBody().id()).isNotNull();
 
         // Read user by ID
-        Long userId = createResponse.getBody().id();
+        var userId = createResponse.getBody().id();
         var getResponse = restTemplate.getForEntity("/users/" + userId, UserResponse.class);
 
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -85,7 +85,7 @@ class ReplicationIntegrationTest {
         // Create user first
         var request = new CreateUserRequest("ToDelete", "delete@example.com");
         var createResponse = restTemplate.postForEntity("/users", request, UserResponse.class);
-        Long userId = createResponse.getBody().id();
+        var userId = createResponse.getBody().id();
 
         // Delete user
         restTemplate.delete("/users/" + userId);
