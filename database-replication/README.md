@@ -80,7 +80,16 @@ curl -X DELETE http://localhost:8080/users/1
 
 Open [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) in your browser to see the interactive API documentation.
 
-### 5. Clean Up
+### 5. Check Health Status
+
+Check the health of both datasources:
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+This will show the status of both writer and reader datasources independently.
+
+### 6. Clean Up
 
 ```bash
 cd docker
@@ -123,9 +132,12 @@ GTID (Global Transaction Identifier) provides:
 - Consistent replication across all servers
 - No need to track binary log positions manually
 
-### Read-After-Write Consistency
+### Security Best Practices
 
-When creating a user, the service reads immediately from the master to ensure the response contains the newly created data (avoids replication lag issues).
+The application demonstrates proper security practices:
+- **Separate Users**: Application uses `app` user with DML-only privileges (SELECT, INSERT, UPDATE, DELETE)
+- **Liquibase Access**: Schema migrations use `root` with DDL privileges, isolated from application runtime
+- **Least Privilege**: Each component has only the minimum required permissions
 
 ## API Reference
 
@@ -135,6 +147,7 @@ When creating a user, the service reads immediately from the master to ensure th
 | GET    | `/users`             | List users (paginated)   | Replica  |
 | GET    | `/users/{id}`        | Get user by ID           | Replica  |
 | GET    | `/users/name/{name}` | Find users by name       | Replica  |
+| PUT    | `/users/{id}`        | Update a user            | Master   |
 | DELETE | `/users/{id}`        | Delete a user            | Master   |
 
 ### Request/Response DTOs
@@ -142,8 +155,16 @@ When creating a user, the service reads immediately from the master to ensure th
 **CreateUserRequest**:
 ```json
 {
-  "name": "John Doe",         // required
-  "email": "john@example.com" // required, valid email
+  "name": "John Doe",         // required, max 255 chars
+  "email": "john@example.com" // required, valid email, max 255 chars
+}
+```
+
+**UpdateUserRequest**:
+```json
+{
+  "name": "John Doe Updated", // required, max 255 chars
+  "email": "john@example.com" // required, valid email, max 255 chars
 }
 ```
 
@@ -181,6 +202,7 @@ docker logs mysql-reader
 
 ### Common Issues
 
-1. **Replica not syncing**: Ensure master is fully started before replica
-2. **Connection refused**: Wait for MySQL containers to be healthy
-3. **Stale reads**: Expected due to replication lag; use read-after-write pattern for critical reads
+1. **Replica not syncing**: The healthcheck now ensures master is fully started before replica
+2. **Connection refused**: Wait for MySQL containers to be healthy (healthcheck runs every 5s)
+3. **Stale reads**: Expected due to replication lag; reads go to replica by default
+4. **Permission errors**: Application uses `app` user; only Liquibase uses `root`
