@@ -35,6 +35,9 @@ class ReplicationIntegrationTest {
         registry.add("spring.datasource.reader.jdbc-url", mysql::getJdbcUrl);
         registry.add("spring.datasource.reader.username", mysql::getUsername);
         registry.add("spring.datasource.reader.password", mysql::getPassword);
+        registry.add("spring.datasource.liquibase.jdbc-url", mysql::getJdbcUrl);
+        registry.add("spring.datasource.liquibase.username", mysql::getUsername);
+        registry.add("spring.datasource.liquibase.password", mysql::getPassword);
     }
 
     @Autowired

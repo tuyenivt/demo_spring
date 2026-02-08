@@ -12,8 +12,11 @@ import org.springframework.stereotype.Component;
  * Aspect that intercepts methods annotated with {@link UseWriter}
  * and routes them to the writer datasource.
  *
- * <p>This aspect has higher precedence than @Transactional (Ordered.LOWEST_PRECEDENCE - 10)
- * to ensure the datasource context is set before the transaction begins.
+ * <p><strong>CRITICAL:</strong> This aspect uses {@code @Order(Ordered.LOWEST_PRECEDENCE - 10)}
+ * to ensure it runs BEFORE the {@code @Transactional} aspect (which defaults to
+ * {@code Ordered.LOWEST_PRECEDENCE}). The routing context MUST be set before any transaction
+ * begins, otherwise the datasource will be selected incorrectly. If aspect ordering is changed
+ * or other aspects are added, ensure this remains the highest precedence aspect in the chain.
  *
  * <p>Uses ScopedValue for context management which automatically handles cleanup.
  */
@@ -25,7 +28,7 @@ public class UseWriterAspect {
 
     @Around("@annotation(useWriter)")
     public Object routeToWriter(ProceedingJoinPoint joinPoint, UseWriter useWriter) {
-        log.debug("Routing to WRITER datasource for method: {}.{}",
+        log.trace("Routing to WRITER datasource for method: {}.{}",
                 joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName());
 

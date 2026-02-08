@@ -19,7 +19,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,6 +50,12 @@ public class DataSourceConfig {
     }
 
     @Bean
+    @ConfigurationProperties("spring.datasource.liquibase")
+    public DataSource liquibaseDataSource() {
+        return DataSourceBuilder.create().type(HikariDataSource.class).build();
+    }
+
+    @Bean
     @Primary
     public DataSource routingDataSource(
             @Qualifier("writerDataSource") DataSource writerDataSource,
@@ -58,9 +63,10 @@ public class DataSourceConfig {
     ) {
         var routingDataSource = new RoutingDataSource();
 
-        var targetDataSources = new HashMap<>();
-        targetDataSources.put(DataSourceType.WRITER, writerDataSource);
-        targetDataSources.put(DataSourceType.READER, readerDataSource);
+        Map<Object, Object> targetDataSources = Map.of(
+                DataSourceType.WRITER, writerDataSource,
+                DataSourceType.READER, readerDataSource
+        );
 
         routingDataSource.setTargetDataSources(targetDataSources);
         routingDataSource.setDefaultTargetDataSource(readerDataSource);
@@ -74,8 +80,7 @@ public class DataSourceConfig {
             EntityManagerFactoryBuilder builder,
             @Qualifier("routingDataSource") DataSource dataSource
     ) {
-        var properties = new HashMap<String, String>();
-        properties.put("hibernate.hbm2ddl.auto", "validate");
+        var properties = Map.of("hibernate.hbm2ddl.auto", "validate");
         return builder
                 .dataSource(dataSource)
                 .packages("com.example.database.replication.entity")
@@ -93,7 +98,7 @@ public class DataSourceConfig {
     }
 
     @Bean
-    public SpringLiquibase liquibase(@Qualifier("writerDataSource") DataSource dataSource) {
+    public SpringLiquibase liquibase(@Qualifier("liquibaseDataSource") DataSource dataSource) {
         var liquibase = new SpringLiquibase();
         liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml");
         liquibase.setDataSource(dataSource);

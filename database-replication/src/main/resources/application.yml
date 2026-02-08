@@ -7,8 +7,8 @@ spring:
   datasource:
     writer:
       jdbc-url: jdbc:mysql://localhost:3306/demo_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      username: root
-      password: root
+      username: app
+      password: app
       hikari:
         pool-name: WriterPool
         maximum-pool-size: 10
@@ -18,13 +18,19 @@ spring:
         max-lifetime: 1800000
     reader:
       jdbc-url: jdbc:mysql://localhost:3307/demo_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      username: root
-      password: root
+      username: app
+      password: app
       hikari:
         pool-name: ReaderPool
         maximum-pool-size: 20  # More connections for reads
         minimum-idle: 10
         connection-timeout: 30000
+        connection-init-sql: SELECT 1
+        initialization-fail-timeout: 1
+    liquibase:
+      jdbc-url: jdbc:mysql://localhost:3306/demo_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      username: root
+      password: root
   jpa:
     show-sql: true
     properties:
@@ -35,6 +41,15 @@ spring:
         order_updates: true
         jdbc:
           batch_size: 100
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
 
 logging:
   level:

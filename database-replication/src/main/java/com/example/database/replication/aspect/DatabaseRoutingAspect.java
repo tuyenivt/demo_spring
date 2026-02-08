@@ -16,13 +16,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseRoutingAspect {
 
-    @Before("execution(* com.example.database.replication.repository.*(..))")
+    @Before("execution(* org.springframework.data.repository.Repository+.*(..))")
     public void logDatabaseOperation(JoinPoint joinPoint) {
         var dataSourceType = DataSourceContextHolder.getCurrentDataSource();
-        log.debug("{} operation via {} datasource: {}.{}",
-                dataSourceType,
-                dataSourceType,
-                joinPoint.getSignature().getDeclaringTypeName(),
-                joinPoint.getSignature().getName());
+        log.trace("{} operation via {} datasource: {}.{}", dataSourceType, dataSourceType,
+                joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
     }
 }
