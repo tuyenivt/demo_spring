@@ -1,18 +1,22 @@
 # Spring Boot Redis Caching Demo
 
-A comprehensive demonstration of Redis caching patterns in Spring Boot, including cache-aside strategy, TTL configuration, pub/sub messaging, and REST API endpoints.
+A comprehensive demonstration of Redis caching patterns in Spring Boot, showcasing service-layer caching, cache-aside strategy with graceful fallback, DTO pattern, input validation, comprehensive testing, and OpenAPI documentation.
 
 ## Features
 
-- **Spring Cache Abstraction** - Declarative caching with `@Cacheable`, `@CachePut`, `@CacheEvict`
-- **Cache-Aside Pattern** - Automatic fallback to database when cache fails
+- **Service-Layer Caching** - Cache annotations at service layer for better separation of concerns
+- **Cache-Aside Pattern** - Automatic fallback to database when Redis is unavailable
 - **TTL Configuration** - Per-cache expiration times with JSON serialization
 - **Connection Pooling** - Lettuce pool for efficient Redis connections
 - **Cache Statistics** - Monitor cache performance via Actuator
-- **Cache Warming** - Pre-populate cache on application startup
+- **Resilient Cache Warming** - Pre-populate cache on startup with error handling
 - **Manual Cache Operations** - REST API for cache management
 - **Pub/Sub Messaging** - Redis publish/subscribe demonstration
-- **Activity Tracking** - Redis list operations (FIFO queue)
+- **Activity Tracking with TTL** - Redis list operations with automatic 7-day expiration
+- **DTO Pattern** - Clean API contract separated from database schema
+- **Input Validation** - Jakarta Bean Validation on all inputs
+- **OpenAPI Documentation** - Interactive API docs via Swagger UI
+- **Comprehensive Testing** - Unit tests and controller tests with high coverage
 
 ## Quick Start
 
@@ -34,21 +38,44 @@ docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DAT
 
 ## API Endpoints
 
+### OpenAPI Documentation
+
+Access interactive API documentation:
+```
+http://localhost:8080/swagger-ui.html
+```
+
 ### Product Operations
 
 ```bash
-# Create a product
-curl -X POST http://localhost:8080/api/products -H "Content-Type: application/json" -d '{"productName":"Widget","category":"PRODUCT","inStock":100,"price":29.99,"dateOfManufacture":"2026-01-02T09:59:01","vendor":"ABC"}'
+# Create a product (validated input)
+curl -X POST http://localhost:8080/api/products -H "Content-Type: application/json" -d '{
+  "productName": "Widget",
+  "category": "PRODUCT",
+  "inStock": 100,
+  "price": 29.99,
+  "dateOfManufacture": "2026-01-02T09:59:01",
+  "vendor": "ABC"
+}'
 
 # Get product by ID (cache miss, then cache hit)
 curl http://localhost:8080/api/products/1
 curl http://localhost:8080/api/products/1  # faster - from cache
 
-# Search products by name
+# Search products by name (cached result)
 curl "http://localhost:8080/api/products/search?name=Widget"
 
-# Update product
-curl -X PUT http://localhost:8080/api/products/1 -H "Content-Type: application/json" -d '{"productName":"Widget Pro","inStock":150,"price":39.99}'
+# Update product (evicts cache and returns 404 if not found)
+curl -X PUT http://localhost:8080/api/products/1 -H "Content-Type: application/json" -d '{
+  "productName": "Widget Pro",
+  "category": "PRODUCT",
+  "inStock": 150,
+  "price": 39.99,
+  "vendor": "ABC"
+}'
+
+# Try to update non-existent product (returns 404)
+curl -X PUT http://localhost:8080/api/products/999 -H "Content-Type: application/json" -d '{...}'
 ```
 
 ### Cache Management
@@ -77,11 +104,19 @@ curl -X POST "http://localhost:8080/api/messages/publish?channel=notifications" 
 ### User Activity Tracking
 
 ```bash
-# Add user activity
+# Add user activity (auto-expires after 7 days)
 curl -X POST http://localhost:8080/api/users/user123/activities -H "Content-Type: text/plain" -d "Logged in"
+
+# Add multiple activities
+curl -X POST http://localhost:8080/api/users/user123/activities -H "Content-Type: text/plain" -d "Viewed dashboard"
+curl -X POST http://localhost:8080/api/users/user123/activities -H "Content-Type: text/plain" -d "Updated profile"
 
 # Get oldest activity (FIFO)
 curl http://localhost:8080/api/users/user123/activities/oldest
+# Returns: "Logged in"
+
+# Try with invalid userId (returns 400)
+curl -X POST http://localhost:8080/api/users//activities -H "Content-Type: text/plain" -d "Test"
 ```
 
 ### Actuator Endpoints
@@ -122,10 +157,27 @@ curl http://localhost:8080/actuator/metrics
 ### Cache-Aside Flow
 
 1. Request comes in for a product
-2. Service tries to get from cache via `ProductCacheRepository`
-3. On cache hit: return cached data immediately
-4. On cache miss: fetch from DB, cache it, return data
-5. On cache error: fallback to `ProductRepository` (direct DB access)
+2. ProductController validates input and maps to/from DTOs
+3. ProductService tries to read from cache (via `@Cacheable`)
+4. On cache hit: return cached data immediately
+5. On cache miss: fetch from DB via `ProductRepository`, cache it, return data
+6. On cache error (`DataAccessException`): fallback to direct DB access with warning log
+7. On save: update/evict caches appropriately based on business rules
+
+### Testing
+
+Run all tests:
+```bash
+./gradlew :caching:test
+```
+
+Test coverage includes:
+- **ProductServiceTest** - Unit tests for caching logic and fallback behavior
+- **UserServiceTest** - Unit tests for Redis list operations and validation
+- **ProductControllerTest** - @WebMvcTest for REST endpoints with validation
+- **CacheControllerTest** - @WebMvcTest for cache management endpoints
+
+All tests run without Docker/Redis/MySQL using Mockito for fast, isolated testing.
 
 ## Connection Pooling
 
