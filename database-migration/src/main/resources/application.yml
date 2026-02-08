@@ -19,6 +19,9 @@ spring:
 scheduled:
   fixedRate: 10000
 
+migration:
+  timezone-offset-hours: -7
+
 demo:
   datasource:
     platform: mysql
