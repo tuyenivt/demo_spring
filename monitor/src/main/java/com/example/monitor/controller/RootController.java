@@ -51,4 +51,15 @@ public class RootController {
         }
         return customers;
     }
+
+    @GetMapping("/customers/unreliable")
+    public List<Customer> unreliable(@RequestParam(defaultValue = "30") int failureRate) {
+        if (failureRate < 0 || failureRate > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "failureRate must be between 0 and 100");
+        }
+        if (random.nextInt(100) < failureRate) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Simulated failure");
+        }
+        return repository.findAll();
+    }
 }
