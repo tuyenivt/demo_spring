@@ -41,6 +41,23 @@ public class OrderDemoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Demo endpoint showing DELETE operation with @Idempotent.
+     * Deleting the same resource twice should return success without error.
+     */
+    @DeleteMapping("/{orderId}")
+    @Idempotent
+    public ResponseEntity<Void> cancelOrder(@PathVariable String orderId) {
+        log.info("Cancelling order: {}", orderId);
+
+        // Simulate order cancellation
+        // In a real system, this would check if the order exists and cancel it
+        // Subsequent calls with the same idempotent key should return the cached success response
+
+        log.info("Order cancelled successfully: orderId={}", orderId);
+        return ResponseEntity.noContent().build();
+    }
+
     private BigDecimal calculateTotal(List<OrderItem> items) {
         if (items == null || items.isEmpty()) {
             return BigDecimal.ZERO;
