@@ -1,7 +1,6 @@
 package com.example.graphql.service;
 
 import com.example.graphql.dto.filter.StudentFilter;
-import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.input.CreateStudentInput;
 import com.example.graphql.dto.input.UpdateStudentInput;
 import com.example.graphql.dto.input.UpsertStudentInput;
@@ -145,11 +144,9 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public List<Student> findAll(Integer limit) {
-        var stream = this.repository.findAll().stream();
-        if (limit != null) {
-            stream = stream.limit(limit);
-        }
-        return stream.toList();
+        int actualLimit = limit != null ? limit : 100;
+        var pageable = PageRequest.of(0, actualLimit);
+        return this.repository.findAll(pageable).getContent();
     }
 
     @Transactional(readOnly = true)

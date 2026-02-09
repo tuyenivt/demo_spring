@@ -1,7 +1,6 @@
 package com.example.graphql.service;
 
 import com.example.graphql.dto.filter.VehicleFilter;
-import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.input.CreateVehicleInput;
 import com.example.graphql.dto.input.UpdateVehicleInput;
 import com.example.graphql.dto.input.UpsertVehicleInput;
@@ -134,11 +133,9 @@ public class VehicleService {
 
     @Transactional(readOnly = true)
     public List<Vehicle> findAll(Integer limit) {
-        var stream = this.vehicleRepository.findAll().stream();
-        if (limit != null) {
-            stream = stream.limit(limit);
-        }
-        return stream.toList();
+        int actualLimit = limit != null ? limit : 100;
+        var pageable = PageRequest.of(0, actualLimit);
+        return this.vehicleRepository.findAll(pageable).getContent();
     }
 
     @Transactional(readOnly = true)

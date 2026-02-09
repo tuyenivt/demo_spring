@@ -7,11 +7,18 @@ public record ConnectionInput(
         String before
 ) {
     public static final int DEFAULT_LIMIT = 20;
+    public static final int MAX_LIMIT = 100;
 
     public int getLimit() {
-        if (first != null) return first;
-        if (last != null) return last;
-        return DEFAULT_LIMIT;
+        int limit;
+        if (first != null) {
+            limit = first;
+        } else if (last != null) {
+            limit = last;
+        } else {
+            limit = DEFAULT_LIMIT;
+        }
+        return Math.min(limit, MAX_LIMIT);
     }
 
     public boolean isForward() {
