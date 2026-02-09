@@ -2,10 +2,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: metrics, health, prometheus
+        include: metrics, health, prometheus, info, loggers, env, app
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
       group:
         liveness:
           include: livenessState
@@ -18,9 +20,14 @@ management:
       percentiles[http.server.requests]: 0.5, 0.7, 0.95, 0.99
       percentiles-histogram[http.server.requests]: true
       slo[http.server.requests]: 10ms, 100ms
+      slo[customer.transform]: 500ms, 1s, 3s
+      percentiles[customer.transform]: 0.5, 0.95, 0.99
   tracing:
     sampling:
       probability: 1.0
+  info:
+    env:
+      enabled: true
 
 spring:
   application:
@@ -33,3 +40,13 @@ spring:
       leak-detection-threshold: 2000
   jpa:
     open-in-view: false
+
+info:
+  app:
+    version: 0.0.1-SNAPSHOT
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name},%X{traceId:-},%X{spanId:-}]"
+  level:
+    com.example.monitor: DEBUG

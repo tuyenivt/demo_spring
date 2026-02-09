@@ -1,45 +1,54 @@
 package com.example.monitor.controller;
 
 import com.example.monitor.entity.Customer;
+import com.example.monitor.health.ExternalApiHealthIndicator;
 import com.example.monitor.repository.CustomerRepository;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Random;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class RootController {
     private final CustomerRepository repository;
     private final Random random;
-    private final Counter customerAccessCounter;
-    private final Timer customerTransformTimer;
+    private final ExternalApiHealthIndicator externalApiHealthIndicator;
 
     @GetMapping("/ping")
     public String ping() {
         return "pong";
     }
 
+    @Observed(name = "customer.list", contextualName = "list-customers")
+    @Counted(value = "customer.access", description = "Number of customer list accesses")
     @GetMapping("/customers")
     public List<Customer> all() {
-        customerAccessCounter.increment();
+        log.info("Listing customers");
         return repository.findAll();
     }
 
+    @Observed(name = "customer.transform.observed", contextualName = "transform-customers")
+    @Timed(value = "customer.transform", description = "Customer transform operation timing")
     @GetMapping("/customers/transform")
     public List<Customer> getCustomersTransform() {
-        return customerTransformTimer.record(() -> {
-            var customers = repository.findAll();
-            try {
-                Thread.sleep(random.nextLong(5000)); //slow operation
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return customers;
-        });
+        var customers = repository.findAll();
+        try {
+            Thread.sleep(random.nextLong(5000));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return customers;
     }
 }
