@@ -48,17 +48,29 @@ public final class StudentSpecification {
             predicates.add(cb.equal(path, filter.eq()));
         }
         if (filter.contains() != null) {
-            predicates.add(cb.like(cb.lower(path), "%" + filter.contains().toLowerCase() + "%"));
+            var escaped = escapeLikePattern(filter.contains());
+            predicates.add(cb.like(cb.lower(path), "%" + escaped.toLowerCase() + "%", '\\'));
         }
         if (filter.startsWith() != null) {
-            predicates.add(cb.like(cb.lower(path), filter.startsWith().toLowerCase() + "%"));
+            var escaped = escapeLikePattern(filter.startsWith());
+            predicates.add(cb.like(cb.lower(path), escaped.toLowerCase() + "%", '\\'));
         }
         if (filter.endsWith() != null) {
-            predicates.add(cb.like(cb.lower(path), "%" + filter.endsWith().toLowerCase()));
+            var escaped = escapeLikePattern(filter.endsWith());
+            predicates.add(cb.like(cb.lower(path), "%" + escaped.toLowerCase(), '\\'));
         }
         if (filter.in() != null && !filter.in().isEmpty()) {
             predicates.add(path.in(filter.in()));
         }
+    }
+
+    private static String escapeLikePattern(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
     private static void addDateTimePredicates(List<Predicate> predicates, CriteriaBuilder cb,
