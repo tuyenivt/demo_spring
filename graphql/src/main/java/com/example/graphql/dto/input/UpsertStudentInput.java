@@ -1,4 +1,4 @@
-package com.example.graphql.dto;
+package com.example.graphql.dto.input;
 
 import jakarta.validation.constraints.NotBlank;
 

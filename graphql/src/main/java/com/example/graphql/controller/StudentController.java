@@ -1,9 +1,9 @@
 package com.example.graphql.controller;
 
-import com.example.graphql.dto.CreateStudentInput;
-import com.example.graphql.dto.UpdateStudentInput;
-import com.example.graphql.dto.UpsertStudentInput;
 import com.example.graphql.dto.filter.StudentFilter;
+import com.example.graphql.dto.input.CreateStudentInput;
+import com.example.graphql.dto.input.UpdateStudentInput;
+import com.example.graphql.dto.input.UpsertStudentInput;
 import com.example.graphql.dto.pagination.Connection;
 import com.example.graphql.dto.pagination.ConnectionInput;
 import com.example.graphql.dto.pagination.PageInput;

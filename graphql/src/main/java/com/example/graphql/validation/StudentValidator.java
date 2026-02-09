@@ -1,9 +1,9 @@
 package com.example.graphql.validation;
 
-import com.example.graphql.dto.CreateStudentInput;
-import com.example.graphql.dto.UpdateStudentInput;
-import com.example.graphql.dto.UpsertStudentInput;
 import com.example.graphql.exception.ErrorCode;
+import com.example.graphql.dto.input.CreateStudentInput;
+import com.example.graphql.dto.input.UpdateStudentInput;
+import com.example.graphql.dto.input.UpsertStudentInput;
 import com.example.graphql.exception.ValidationException;
 import org.springframework.stereotype.Component;
 

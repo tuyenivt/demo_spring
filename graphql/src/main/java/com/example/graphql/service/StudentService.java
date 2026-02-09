@@ -1,10 +1,10 @@
 package com.example.graphql.service;
 
-import com.example.graphql.dto.CreateStudentInput;
-import com.example.graphql.dto.UpdateStudentInput;
-import com.example.graphql.dto.UpsertStudentInput;
 import com.example.graphql.dto.filter.StudentFilter;
 import com.example.graphql.dto.pagination.*;
+import com.example.graphql.dto.input.CreateStudentInput;
+import com.example.graphql.dto.input.UpdateStudentInput;
+import com.example.graphql.dto.input.UpsertStudentInput;
 import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.sort.StudentSort;
 import com.example.graphql.entity.Student;

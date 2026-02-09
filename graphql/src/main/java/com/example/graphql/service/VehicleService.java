@@ -1,10 +1,10 @@
 package com.example.graphql.service;
 
-import com.example.graphql.dto.CreateVehicleInput;
-import com.example.graphql.dto.UpdateVehicleInput;
-import com.example.graphql.dto.UpsertVehicleInput;
 import com.example.graphql.dto.filter.VehicleFilter;
 import com.example.graphql.dto.pagination.*;
+import com.example.graphql.dto.input.CreateVehicleInput;
+import com.example.graphql.dto.input.UpdateVehicleInput;
+import com.example.graphql.dto.input.UpsertVehicleInput;
 import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.sort.VehicleSort;
 import com.example.graphql.entity.Vehicle;

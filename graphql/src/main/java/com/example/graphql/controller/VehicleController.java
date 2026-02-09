@@ -1,9 +1,9 @@
 package com.example.graphql.controller;
 
-import com.example.graphql.dto.CreateVehicleInput;
-import com.example.graphql.dto.UpdateVehicleInput;
-import com.example.graphql.dto.UpsertVehicleInput;
 import com.example.graphql.dto.filter.VehicleFilter;
+import com.example.graphql.dto.input.CreateVehicleInput;
+import com.example.graphql.dto.input.UpdateVehicleInput;
+import com.example.graphql.dto.input.UpsertVehicleInput;
 import com.example.graphql.dto.pagination.Connection;
 import com.example.graphql.dto.pagination.ConnectionInput;
 import com.example.graphql.dto.pagination.PageInput;

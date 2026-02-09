@@ -1,8 +1,8 @@
 package com.example.graphql.validation;
 
-import com.example.graphql.dto.CreateVehicleInput;
-import com.example.graphql.dto.UpdateVehicleInput;
-import com.example.graphql.dto.UpsertVehicleInput;
+import com.example.graphql.dto.input.CreateVehicleInput;
+import com.example.graphql.dto.input.UpdateVehicleInput;
+import com.example.graphql.dto.input.UpsertVehicleInput;
 import com.example.graphql.enums.VehicleType;
 import com.example.graphql.exception.ErrorCode;
 import com.example.graphql.exception.ValidationException;

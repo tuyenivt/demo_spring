@@ -1,4 +1,4 @@
-package com.example.graphql.dto;
+package com.example.graphql.dto.input;
 
 import com.example.graphql.enums.VehicleType;
 
