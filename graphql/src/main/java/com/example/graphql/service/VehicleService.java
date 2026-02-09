@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,6 +63,26 @@ public class VehicleService {
     @Transactional
     public List<Vehicle> createAll(List<CreateVehicleInput> inputs) {
         inputs.forEach(validator::validateCreate);
+
+        // Group inputs by studentId and validate vehicle limits
+        var inputsByStudent = inputs.stream()
+                .filter(input -> input.studentId() != null)
+                .collect(Collectors.groupingBy(CreateVehicleInput::studentId));
+
+        for (var entry : inputsByStudent.entrySet()) {
+            var studentId = entry.getKey();
+            var studentInputs = entry.getValue();
+            var existingCount = vehicleRepository.countByStudentId(studentId);
+            var totalCount = existingCount + studentInputs.size();
+
+            if (totalCount > 5) {
+                throw new com.example.graphql.exception.ValidationException(
+                        ErrorCode.BUSINESS_RULE_VIOLATION,
+                        String.format("Bulk operation would exceed vehicle limit for student %s (existing: %d, new: %d, max: 5)",
+                                studentId, existingCount, studentInputs.size())
+                );
+            }
+        }
 
         try {
             var vehicles = inputs.stream().map(input -> {
