@@ -4,26 +4,31 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-@Component
+import java.util.concurrent.atomic.AtomicBoolean;
+
+@Component("externalApi")
 public class ExternalApiHealthIndicator implements HealthIndicator {
+
+    private final AtomicBoolean healthy = new AtomicBoolean(true);
+
+    public void setHealthy(boolean value) {
+        this.healthy.set(value);
+    }
+
+    public boolean isHealthy() {
+        return healthy.get();
+    }
 
     @Override
     public Health health() {
-        if (checkExternalApi()) {
+        if (healthy.get()) {
             return Health.up()
                     .withDetail("externalApi", "Available")
-                    .withDetail("responseTime", "< 100ms")
                     .build();
         }
         return Health.down()
                 .withDetail("externalApi", "Unavailable")
-                .withDetail("error", "Connection timeout")
+                .withDetail("error", "Simulated outage")
                 .build();
-    }
-
-    private boolean checkExternalApi() {
-        // Simulate checking external service availability
-        // In a real application, this would make an HTTP call or ping the service
-        return true;
     }
 }

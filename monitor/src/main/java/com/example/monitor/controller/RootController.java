@@ -62,4 +62,11 @@ public class RootController {
         }
         return repository.findAll();
     }
+
+    @PostMapping("/health/toggle")
+    public String toggleHealth() {
+        var next = !externalApiHealthIndicator.isHealthy();
+        externalApiHealthIndicator.setHealthy(next);
+        return "Health toggled to: " + next;
+    }
 }
