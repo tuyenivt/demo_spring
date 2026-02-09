@@ -10,15 +10,17 @@ import com.example.graphql.dto.pagination.PageInput;
 import com.example.graphql.dto.pagination.PageResult;
 import com.example.graphql.dto.sort.StudentSort;
 import com.example.graphql.entity.Student;
+import com.example.graphql.entity.Vehicle;
 import com.example.graphql.service.StudentService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -54,22 +56,27 @@ public class StudentController {
     }
 
     @MutationMapping
-    public Student createStudent(@Argument @Valid CreateStudentInput input) {
+    public Student createStudent(@Argument CreateStudentInput input) {
         return this.service.create(input);
     }
 
     @MutationMapping
-    public List<Student> createStudents(@Argument @Valid List<CreateStudentInput> inputs) {
+    public List<Student> createStudents(@Argument List<CreateStudentInput> inputs) {
         return this.service.createAll(inputs);
     }
 
     @MutationMapping
-    public Student updateStudent(@Argument @Valid UpdateStudentInput input) {
+    public Student updateStudent(@Argument UpdateStudentInput input) {
         return this.service.update(input);
     }
 
     @MutationMapping
-    public Student upsertStudent(@Argument @Valid UpsertStudentInput input) {
+    public Student upsertStudent(@Argument UpsertStudentInput input) {
         return this.service.upsert(input);
+    }
+
+    @BatchMapping
+    public Map<Student, List<Vehicle>> vehicles(List<Student> students) {
+        return this.service.findVehiclesForStudents(students);
     }
 }

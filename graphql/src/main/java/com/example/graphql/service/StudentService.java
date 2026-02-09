@@ -7,10 +7,12 @@ import com.example.graphql.dto.input.UpsertStudentInput;
 import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.sort.StudentSort;
 import com.example.graphql.entity.Student;
+import com.example.graphql.entity.Vehicle;
 import com.example.graphql.exception.ErrorCode;
 import com.example.graphql.exception.ResourceNotFoundException;
 import com.example.graphql.exception.TechnicalException;
 import com.example.graphql.repository.StudentRepository;
+import com.example.graphql.repository.VehicleRepository;
 import com.example.graphql.specification.StudentSpecification;
 import com.example.graphql.util.CursorUtils;
 import com.example.graphql.util.SortUtils;
@@ -26,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,6 +38,7 @@ import java.util.UUID;
 public class StudentService {
     private final StudentRepository repository;
     private final StudentValidator validator;
+    private final VehicleRepository vehicleRepository;
 
     @Transactional
     public Student create(CreateStudentInput input) {
@@ -199,5 +204,21 @@ public class StudentService {
         var pageInfo = new PageInfoConnection(hasMore, afterCursor != null, startCursor, endCursor);
 
         return new Connection<>(edges, pageInfo, totalCount);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Student, List<Vehicle>> findVehiclesForStudents(List<Student> students) {
+        var studentIds = students.stream().map(Student::getId).collect(Collectors.toSet());
+
+        var vehicles = vehicleRepository.findAll((root, _, _) ->
+                root.get("student").get("id").in(studentIds));
+
+        return students.stream()
+                .collect(Collectors.toMap(
+                        student -> student,
+                        student -> vehicles.stream()
+                                .filter(v -> v.getStudent() != null && v.getStudent().getId().equals(student.getId()))
+                                .toList()
+                ));
     }
 }

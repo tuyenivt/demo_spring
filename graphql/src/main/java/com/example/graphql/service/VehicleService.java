@@ -6,6 +6,7 @@ import com.example.graphql.dto.input.UpdateVehicleInput;
 import com.example.graphql.dto.input.UpsertVehicleInput;
 import com.example.graphql.dto.pagination.*;
 import com.example.graphql.dto.sort.VehicleSort;
+import com.example.graphql.entity.Student;
 import com.example.graphql.entity.Vehicle;
 import com.example.graphql.exception.ErrorCode;
 import com.example.graphql.exception.ResourceNotFoundException;
@@ -26,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -209,5 +212,23 @@ public class VehicleService {
         var pageInfo = new PageInfoConnection(hasMore, afterCursor != null, startCursor, endCursor);
 
         return new Connection<>(edges, pageInfo, totalCount);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Vehicle, Student> findStudentsForVehicles(List<Vehicle> vehicles) {
+        var studentIds = vehicles.stream()
+                .map(Vehicle::getStudent)
+                .filter(Objects::nonNull)
+                .map(Student::getId)
+                .collect(Collectors.toSet());
+
+        var students = studentRepository.findAllById(studentIds);
+        var studentMap = students.stream().collect(Collectors.toMap(Student::getId, student -> student));
+
+        return vehicles.stream()
+                .collect(Collectors.toMap(
+                        vehicle -> vehicle,
+                        vehicle -> vehicle.getStudent() != null ? studentMap.get(vehicle.getStudent().getId()) : null
+                ));
     }
 }
