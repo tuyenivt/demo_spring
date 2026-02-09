@@ -2,6 +2,7 @@ package com.example.idempotent.controller;
 
 import com.example.idempotent.dto.SubscribeRequest;
 import com.example.idempotent.idempotent.PreventRepeatedRequests;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ public class SubscriptionDemoController {
 
     @PostMapping
     @PreventRepeatedRequests
-    public ResponseEntity<Void> subscribe(@RequestBody SubscribeRequest request) {
+    public ResponseEntity<Void> subscribe(@Valid @RequestBody SubscribeRequest request) {
         log.info("Processing subscription for: email={}", request.getEmail());
 
         // Simulate subscription processing

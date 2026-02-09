@@ -3,6 +3,7 @@ package com.example.idempotent.controller;
 import com.example.idempotent.dto.PaymentRequest;
 import com.example.idempotent.dto.PaymentResponse;
 import com.example.idempotent.idempotent.Idempotent;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class PaymentDemoController {
 
     @PostMapping
     @Idempotent
-    public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) {
+    public ResponseEntity<PaymentResponse> processPayment(@Valid @RequestBody PaymentRequest request) {
         log.info("Processing payment: amount={}, currency={}", request.getAmount(), request.getCurrency());
 
         // Simulate payment processing

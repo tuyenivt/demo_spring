@@ -4,13 +4,11 @@ import com.example.idempotent.dto.OrderItem;
 import com.example.idempotent.dto.OrderRequest;
 import com.example.idempotent.dto.OrderResponse;
 import com.example.idempotent.idempotent.Idempotent;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,7 +26,7 @@ public class OrderDemoController {
 
     @PostMapping
     @Idempotent
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request) {
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
         log.info("Creating order with {} items", request.getItems() != null ? request.getItems().size() : 0);
 
         var response = OrderResponse.builder()
