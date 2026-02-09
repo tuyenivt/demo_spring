@@ -6,6 +6,11 @@ AOP-based idempotency library using Redis for duplicate request detection and re
 
 - **@Idempotent**: Full response caching with automatic replay on duplicate requests
 - **@PreventRepeatedRequests**: Simple duplicate blocking without response caching
+- **Atomic Redis operations**: Race-condition-free duplicate detection using `SETNX`
+- **Per-endpoint configuration**: Override global timeout/expiry per annotation
+- **Required idempotent key validation**: Returns 400 Bad Request if header is missing
+- **Automatic cleanup on failure**: Retries allowed after method execution errors
+- **Request validation**: Bean Validation on all request DTOs
 - Redis-backed distributed idempotency
 - Configurable TTL for duplicate detection and result caching
 - Global exception handling with structured error responses
@@ -46,9 +51,17 @@ curl -X POST http://localhost:8080/api/demo/payments \
 Use for critical operations where you need to cache and replay the response:
 
 ```java
+// With default global config
 @PostMapping("/payments")
 @Idempotent
-public Payment processPayment(@RequestBody PaymentRequest request) {
+public Payment processPayment(@Valid @RequestBody PaymentRequest request) {
+    return paymentService.process(request);
+}
+
+// With custom per-endpoint config
+@PostMapping("/payments")
+@Idempotent(timeout = 30, timeUnit = TimeUnit.SECONDS, resultExpire = 60)
+public Payment processPayment(@Valid @RequestBody PaymentRequest request) {
     return paymentService.process(request);
 }
 ```
@@ -58,19 +71,27 @@ public Payment processPayment(@RequestBody PaymentRequest request) {
 Use for simple duplicate prevention without response caching:
 
 ```java
+// With default global config
 @PostMapping("/subscribe")
 @PreventRepeatedRequests
-public void subscribe(@RequestBody SubscribeRequest request) {
+public void subscribe(@Valid @RequestBody SubscribeRequest request) {
+    subscriptionService.subscribe(request);
+}
+
+// With custom timeout
+@PostMapping("/subscribe")
+@PreventRepeatedRequests(timeout = 5, timeUnit = TimeUnit.MINUTES)
+public void subscribe(@Valid @RequestBody SubscribeRequest request) {
     subscriptionService.subscribe(request);
 }
 ```
 
 ## HTTP Headers
 
-| Header | Description |
-|--------|-------------|
-| `Idempotent-Key` | Required. Unique identifier for the request |
-| `Idempotent-Replay` | Optional. Set to `true` to force re-execution |
+| Header              | Required | Description                                                            |
+|---------------------|----------|------------------------------------------------------------------------|
+| `Idempotent-Key`    | **Yes**  | Unique identifier for the request (validated - returns 400 if missing) |
+| `Idempotent-Replay` | No       | Set to `true` to force re-execution and cache update                   |
 
 ## Configuration
 
@@ -83,11 +104,12 @@ app:
 
 ## Demo Endpoints
 
-| Endpoint | Annotation | Use Case |
-|----------|------------|----------|
-| `POST /api/demo/payments` | @Idempotent | Payment processing |
-| `POST /api/demo/orders` | @Idempotent | Order creation |
-| `POST /api/demo/subscriptions` | @PreventRepeatedRequests | Newsletter signup |
+| Endpoint                     | Method | Annotation               | Use Case                        |
+|------------------------------|--------|--------------------------|---------------------------------|
+| `/api/demo/payments`         | POST   | @Idempotent              | Payment processing with caching |
+| `/api/demo/orders`           | POST   | @Idempotent              | Order creation with caching     |
+| `/api/demo/orders/{orderId}` | DELETE | @Idempotent              | Idempotent order cancellation   |
+| `/api/demo/subscriptions`    | POST   | @PreventRepeatedRequests | Newsletter signup               |
 
 ## Testing
 

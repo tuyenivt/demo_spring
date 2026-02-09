@@ -67,10 +67,12 @@ idempotent/
 
 ### Annotations
 
-| Annotation | Purpose | Use Case |
-|------------|---------|----------|
-| `@Idempotent` | Caches full response, returns cached on duplicate | Payments, orders, critical operations |
-| `@PreventRepeatedRequests` | Blocks duplicates, no result caching | Form submissions, button clicks |
+| Annotation                 | Purpose                                           | Use Case                              | Configuration                         |
+|----------------------------|---------------------------------------------------|---------------------------------------|---------------------------------------|
+| `@Idempotent`              | Caches full response, returns cached on duplicate | Payments, orders, critical operations | `timeout`, `timeUnit`, `resultExpire` |
+| `@PreventRepeatedRequests` | Blocks duplicates, no result caching              | Form submissions, button clicks       | `timeout`, `timeUnit`                 |
+
+Both annotations support per-endpoint configuration. Set `timeout = -1` to use global config.
 
 ### Cache Key Composition
 
@@ -79,10 +81,10 @@ idempotent/
 
 ### HTTP Headers
 
-| Header | Purpose |
-|--------|---------|
-| `Idempotent-Key` | Client-provided unique request identifier |
-| `Idempotent-Replay: true` | Force re-execution and cache update |
+| Header                    | Required | Purpose                                                                       |
+|---------------------------|----------|-------------------------------------------------------------------------------|
+| `Idempotent-Key`          | **Yes**  | Client-provided unique request identifier (validated, returns 400 if missing) |
+| `Idempotent-Replay: true` | No       | Force re-execution and cache update                                           |
 
 ## Configuration
 
@@ -101,23 +103,35 @@ app:
 - Spring Boot AOP
 - Spring Data Redis
 - Spring Boot Web
+- Spring Boot Validation (Bean Validation)
 - Lombok
 - Testcontainers (testing)
+- Mockito (unit testing)
 
 ## Request Flow
 
-1. **New request**: Execute method → cache result → return
+1. **New request**: Atomic lock acquisition → execute method → cache result → return
 2. **Duplicate (in progress)**: Return 409 Conflict with TTL info
 3. **Duplicate (completed)**: Return cached result
-4. **Replay header**: Bypass check, execute method, update cache
+4. **Replay header**: Delete cache, execute method, update cache
+5. **Method failure**: Delete cache key to allow retries
+
+## Security & Reliability Features
+
+- **Atomic Redis operations**: Uses `SETNX` to prevent race conditions on concurrent duplicate requests
+- **Required idempotent key**: Validates `Idempotent-Key` header presence (returns 400 Bad Request if missing)
+- **Cleanup on failure**: Deletes cache keys when method execution fails to allow retries
+- **Per-endpoint configuration**: Override global timeout/expiry settings per annotation
+- **Request validation**: All DTOs validated with Bean Validation annotations
 
 ## Demo Endpoints
 
-| Endpoint | Method | Annotation | Description |
-|----------|--------|------------|-------------|
-| `/api/demo/payments` | POST | `@Idempotent` | Payment processing with full response caching |
-| `/api/demo/orders` | POST | `@Idempotent` | Order creation with full response caching |
-| `/api/demo/subscriptions` | POST | `@PreventRepeatedRequests` | Newsletter signup with simple duplicate blocking |
+| Endpoint                     | Method | Annotation                 | Description                                      |
+|------------------------------|--------|----------------------------|--------------------------------------------------|
+| `/api/demo/payments`         | POST   | `@Idempotent`              | Payment processing with full response caching    |
+| `/api/demo/orders`           | POST   | `@Idempotent`              | Order creation with full response caching        |
+| `/api/demo/orders/{orderId}` | DELETE | `@Idempotent`              | Idempotent order cancellation                    |
+| `/api/demo/subscriptions`    | POST   | `@PreventRepeatedRequests` | Newsletter signup with simple duplicate blocking |
 
 ### Testing Demo Endpoints
 
@@ -140,6 +154,10 @@ curl -X POST http://localhost:8080/api/demo/orders \
   -H "Idempotent-Key: order-456" \
   -d '{"items": [{"productId": "PROD-001", "productName": "Widget", "quantity": 2, "price": 50.00}], "shippingAddress": "123 Main St"}'
 
+# Order: Cancel order (idempotent DELETE)
+curl -X DELETE http://localhost:8080/api/demo/orders/order-123 \
+  -H "Idempotent-Key: cancel-456"
+
 # Subscription: First request succeeds
 curl -X POST http://localhost:8080/api/demo/subscriptions \
   -H "Content-Type: application/json" \
@@ -151,6 +169,17 @@ curl -X POST http://localhost:8080/api/demo/subscriptions \
   -H "Content-Type: application/json" \
   -H "Idempotent-Key: sub-789" \
   -d '{"email": "test@example.com", "name": "Test User"}'
+
+# Missing Idempotent-Key header returns 400 Bad Request
+curl -X POST http://localhost:8080/api/demo/payments \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 100.00, "currency": "USD"}'
+
+# Invalid request data returns 400 Bad Request (validation)
+curl -X POST http://localhost:8080/api/demo/payments \
+  -H "Content-Type: application/json" \
+  -H "Idempotent-Key: payment-999" \
+  -d '{"amount": -100.00, "currency": ""}'
 ```
 
 ## Error Handling
