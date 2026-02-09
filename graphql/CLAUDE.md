@@ -83,6 +83,8 @@ src/main/resources/graphql/
 | `updateVehicle(input)`   | Partial update        |
 | `upsertVehicle(input)`   | Create or update      |
 
+**Note on Partial Updates:** The `update` mutations perform partial updates where only provided fields are modified. However, it is not possible to explicitly set a field to `null` (clear it) - passing `null` means "don't change this field". To perform a full replacement including clearing fields, use the `upsert` mutation with all fields specified.
+
 ## Filtering
 
 ### StringFilter
