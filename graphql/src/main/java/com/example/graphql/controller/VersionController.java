@@ -29,7 +29,7 @@ public class VersionController {
                         "String type for Vehicle.type - use VehicleType enum instead",
                         "V1 types (StudentV1, VehicleV1) - use current types instead"
                 ),
-                "2025-12-31"
+                "2027-12-31"
         );
     }
 

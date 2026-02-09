@@ -7,10 +7,10 @@ import com.example.graphql.enums.VehicleType;
 import com.example.graphql.exception.ErrorCode;
 import com.example.graphql.exception.ValidationException;
 import com.example.graphql.repository.StudentRepository;
+import com.example.graphql.util.AgeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -86,12 +86,7 @@ public class VehicleValidator {
             throw new ValidationException(ErrorCode.VEHICLE_ASSIGNMENT_ERROR, "Cannot assign vehicle to student without a date of birth");
         }
 
-        var dob = student.getDateOfBirth();
-        var now = LocalDate.now();
-        var age = now.getYear() - dob.getYear();
-        if (dob.plusYears(age).isAfter(now)) {
-            age--;
-        }
+        var age = AgeUtils.calculateAge(student.getDateOfBirth());
 
         if (vehicleType != null) {
             validateAgeForVehicleType(vehicleType, age, student.getName());

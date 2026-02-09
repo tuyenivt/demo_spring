@@ -1,10 +1,10 @@
 package com.example.graphql.validation;
 
-import com.example.graphql.exception.ErrorCode;
 import com.example.graphql.dto.input.CreateStudentInput;
 import com.example.graphql.dto.input.UpdateStudentInput;
 import com.example.graphql.dto.input.UpsertStudentInput;
 import com.example.graphql.exception.ValidationException;
+import com.example.graphql.util.AgeUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -97,30 +97,20 @@ public class StudentValidator {
 
         try {
             var dob = LocalDate.parse(dateOfBirth);
-            var now = LocalDate.now();
-
-            if (dob.isAfter(now)) {
+            if (dob.isAfter(LocalDate.now())) {
                 errors.put("dateOfBirth", "Date of birth cannot be in the future");
                 return;
             }
 
-            var age = now.getYear() - dob.getYear();
-            if (dob.plusYears(age).isAfter(now)) {
-                age--;
-            }
+            var age = AgeUtils.calculateAge(dob);
 
             if (age < MIN_AGE) {
-                throw new ValidationException(
-                        ErrorCode.STUDENT_AGE_INVALID,
-                        String.format("Student must be at least %d years old (current age: %d)", MIN_AGE, age)
-                );
+                errors.put("dateOfBirth", String.format("Student must be at least %d years old (current age: %d)", MIN_AGE, age));
+                return;
             }
 
             if (age > MAX_AGE) {
-                throw new ValidationException(
-                        ErrorCode.STUDENT_AGE_INVALID,
-                        String.format("Invalid age: %d years. Maximum allowed age is %d", age, MAX_AGE)
-                );
+                errors.put("dateOfBirth", String.format("Invalid age: %d years. Maximum allowed age is %d", age, MAX_AGE));
             }
 
         } catch (DateTimeParseException e) {

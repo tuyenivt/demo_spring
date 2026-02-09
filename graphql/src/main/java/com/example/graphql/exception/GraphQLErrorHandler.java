@@ -4,6 +4,7 @@ import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,9 @@ import java.util.Map;
 public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
 
     private static final String MASKED_ERROR_MESSAGE = "An internal error occurred. Please contact support.";
-    private static final boolean MASK_TECHNICAL_ERRORS = true;
+
+    @Value("${graphql.errors.mask-technical:true}")
+    private boolean maskTechnicalErrors;
 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
@@ -52,7 +55,7 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
     private GraphQLError handleUnexpectedException(Throwable ex, DataFetchingEnvironment env) {
         log.error("Unexpected error occurred", ex);
 
-        if (MASK_TECHNICAL_ERRORS) {
+        if (maskTechnicalErrors) {
             return buildMaskedError(env);
         }
 
@@ -61,7 +64,7 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
     }
 
     private boolean shouldMaskError(ErrorCode errorCode) {
-        return MASK_TECHNICAL_ERRORS && errorCode.isTechnicalError();
+        return maskTechnicalErrors && errorCode.isTechnicalError();
     }
 
     private GraphQLError buildError(DataFetchingEnvironment env, ErrorCode errorCode,

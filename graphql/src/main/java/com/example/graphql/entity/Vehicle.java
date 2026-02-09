@@ -10,12 +10,13 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "vehicle")
 public class Vehicle extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private VehicleType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;
 }

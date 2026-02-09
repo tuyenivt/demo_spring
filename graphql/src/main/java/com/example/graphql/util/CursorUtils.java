@@ -1,5 +1,8 @@
 package com.example.graphql.util;
 
+import com.example.graphql.exception.ErrorCode;
+import com.example.graphql.exception.ValidationException;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
@@ -21,12 +24,12 @@ public final class CursorUtils {
         try {
             byte[] decoded = Base64.getDecoder().decode(cursor);
             String raw = new String(decoded, StandardCharsets.UTF_8);
-            if (raw.startsWith(CURSOR_PREFIX)) {
-                return UUID.fromString(raw.substring(CURSOR_PREFIX.length()));
+            if (!raw.startsWith(CURSOR_PREFIX)) {
+                throw new ValidationException(ErrorCode.INVALID_INPUT, "Invalid cursor format: missing prefix");
             }
-            return null;
+            return UUID.fromString(raw.substring(CURSOR_PREFIX.length()));
         } catch (IllegalArgumentException e) {
-            return null;
+            throw new ValidationException(ErrorCode.INVALID_INPUT, "Invalid cursor format: " + e.getMessage());
         }
     }
 }
