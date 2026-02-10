@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "Inventory Module",
-        allowedDependencies = {"shared"}
+        allowedDependencies = {"order", "shared::api"}
 )
 package com.example.modulith.inventory;
