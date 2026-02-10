@@ -2,7 +2,7 @@ plugins {
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version "${springDependencyMngmtVersion}"
     id 'java'
-    id 'org.hidetake.swagger.generator' version '2.19.2'
+    id 'org.openapi.generator' version '7.19.0'
 }
 
 group = 'com.example'
@@ -32,12 +32,12 @@ dependencies {
     implementation 'io.github.openfeign:feign-core:10.12'
     implementation 'io.github.openfeign:feign-okhttp:10.12'
     implementation 'io.github.openfeign:feign-jackson:10.12'
+    implementation 'com.github.scribejava:scribejava-apis:8.3.3'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.40'
     implementation 'org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.75'
 }
 
 dependencyManagement {
@@ -46,31 +46,32 @@ dependencyManagement {
     }
 }
 
-swaggerSources {
-    petstore {
-        inputFile = file('swagger/petstore.yaml')
-        code {
-            language = 'java'
-            configFile = file('swagger/config-petstore.json')
-        }
-    }
+openApiGenerate {
+    generatorName = "java"
+    inputSpec = "$projectDir/swagger/petstore.yaml"
+    outputDir = "$buildDir/openapi"
+    configFile = "$projectDir/swagger/config-petstore.json"
+    generateApiTests = false
+    generateModelTests = false
+    generateApiDocumentation = false
+    generateModelDocumentation = false
 }
 
 compileJava {
-    dependsOn swaggerSources.petstore.code
+    dependsOn tasks.named("openApiGenerate")
 }
 
 tasks.named("processResources") {
-    dependsOn(tasks.named("generateSwaggerCodePetstore"))
+    dependsOn(tasks.named("openApiGenerate"))
 }
 
 sourceSets {
     main {
         java {
-            srcDir "${swaggerSources.petstore.code.outputDir}/src/main/java"
+            srcDir "$buildDir/openapi/src/main/java"
         }
         resources {
-            srcDir "${swaggerSources.petstore.code.outputDir}/src/main/resources"
+            srcDir "$buildDir/openapi/src/main/resources"
         }
     }
 }
