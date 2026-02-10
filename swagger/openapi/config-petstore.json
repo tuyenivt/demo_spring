@@ -1,0 +1,10 @@
+{
+  "library": "feign",
+  "dateLibrary": "java8-localdatetime",
+  "hideGenerationTimestamp": true,
+  "useJakartaEe": true,
+  "openApiNullable": false,
+  "modelPackage": "com.example.openapi.petstore.model",
+  "apiPackage": "com.example.openapi.petstore.api",
+  "invokerPackage": "com.example.openapi.petstore.invoker"
+}

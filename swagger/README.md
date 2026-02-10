@@ -4,7 +4,7 @@ Spring Boot demo that generates a Petstore client and now exposes its own REST A
 
 ## What this module does
 
-- Generates `PetApi`, `StoreApi`, and `UserApi` clients from an OpenAPI 3.x spec (`swagger/petstore.yaml`) using `org.openapi.generator`.
+- Generates `PetApi`, `StoreApi`, and `UserApi` clients from an OpenAPI 3.x spec (`openapi/petstore.yaml`) using `org.openapi.generator`.
 - Calls the external Petstore API via Feign + OkHttp.
 - Exposes local REST endpoints under `/api/pets` with OpenAPI 3 documentation.
 

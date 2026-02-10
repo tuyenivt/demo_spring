@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Swagger Petstore
+  title: OpenAPI Petstore
   description: >-
-    This is a sample server Petstore server. You can find out more about Swagger
+    This is a sample server Petstore server. You can find out more about OpenAPI
     at http://swagger.io.
   termsOfService: http://swagger.io/terms/
   contact:
@@ -643,5 +643,5 @@ components:
       xml:
         name: User
 externalDocs:
-  description: Find out more about Swagger
+  description: Find out more about OpenAPI
   url: http://swagger.io

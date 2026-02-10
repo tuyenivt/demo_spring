@@ -1,10 +1,10 @@
-package com.example.swagger.controller;
+package com.example.openapi.controller;
 
-import com.example.swagger.dto.CreatePetRequest;
-import com.example.swagger.dto.ErrorResponse;
-import com.example.swagger.dto.PetResponse;
-import io.swagger.petstore.api.PetApi;
-import io.swagger.petstore.model.Pet;
+import com.example.openapi.dto.CreatePetRequest;
+import com.example.openapi.dto.ErrorResponse;
+import com.example.openapi.dto.PetResponse;
+import com.example.openapi.petstore.api.PetApi;
+import com.example.openapi.petstore.model.Pet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

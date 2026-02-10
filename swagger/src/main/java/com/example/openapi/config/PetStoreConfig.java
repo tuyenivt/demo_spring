@@ -1,13 +1,13 @@
-package com.example.swagger.config;
+package com.example.openapi.config;
 
+import com.example.openapi.petstore.api.PetApi;
+import com.example.openapi.petstore.api.StoreApi;
+import com.example.openapi.petstore.api.UserApi;
 import feign.Client;
 import feign.Feign;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import io.swagger.petstore.api.PetApi;
-import io.swagger.petstore.api.StoreApi;
-import io.swagger.petstore.api.UserApi;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

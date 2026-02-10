@@ -1,4 +1,4 @@
-package com.example.swagger.config;
+package com.example.openapi.config;
 
 import feign.Client;
 import feign.okhttp.OkHttpClient;

@@ -1,8 +1,8 @@
-package com.example.swagger.controller;
+package com.example.openapi.controller;
 
-import com.example.swagger.exception.GlobalExceptionHandler;
-import io.swagger.petstore.api.PetApi;
-import io.swagger.petstore.model.Pet;
+import com.example.openapi.exception.GlobalExceptionHandler;
+import com.example.openapi.petstore.api.PetApi;
+import com.example.openapi.petstore.model.Pet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

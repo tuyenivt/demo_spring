@@ -48,9 +48,9 @@ dependencyManagement {
 
 openApiGenerate {
     generatorName = "java"
-    inputSpec = "$projectDir/swagger/petstore.yaml"
+    inputSpec = "$projectDir/openapi/petstore.yaml"
     outputDir = "$buildDir/openapi"
-    configFile = "$projectDir/swagger/config-petstore.json"
+    configFile = "$projectDir/openapi/config-petstore.json"
     generateApiTests = false
     generateModelTests = false
     generateApiDocumentation = false

@@ -1,4 +1,4 @@
-package com.example.swagger;
+package com.example.openapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

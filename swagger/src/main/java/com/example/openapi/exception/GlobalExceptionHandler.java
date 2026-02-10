@@ -1,6 +1,6 @@
-package com.example.swagger.exception;
+package com.example.openapi.exception;
 
-import com.example.swagger.dto.ErrorResponse;
+import com.example.openapi.dto.ErrorResponse;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
