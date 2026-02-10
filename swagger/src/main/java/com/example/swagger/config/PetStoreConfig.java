@@ -10,6 +10,7 @@ import io.swagger.petstore.api.StoreApi;
 import io.swagger.petstore.api.UserApi;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,39 +21,36 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app.pet-store")
 public class PetStoreConfig {
 
+    @Setter
     private String baseUrl;
+    @Setter
     private String username;
+    @Setter
     private String password;
 
     private final Client client;
 
-    @Bean
-    public PetApi getPetApi() {
+    private <T> T buildClient(Class<T> apiType) {
         return Feign.builder()
                 .client(client)
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .target(PetApi.class, baseUrl);
+                .target(apiType, baseUrl);
+    }
+
+    @Bean
+    public PetApi getPetApi() {
+        return buildClient(PetApi.class);
     }
 
     @Bean
     public StoreApi getStoreApi() {
-        return Feign.builder()
-                .client(client)
-                .encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .target(StoreApi.class, baseUrl);
+        return buildClient(StoreApi.class);
     }
 
     @Bean
     public UserApi getUserApi() {
-        return Feign.builder()
-                .client(client)
-                .encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .target(UserApi.class, baseUrl);
+        return buildClient(UserApi.class);
     }
 }

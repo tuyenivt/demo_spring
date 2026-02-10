@@ -4,6 +4,13 @@ spring:
 
 app:
   pet-store:
-    base-url: https://petstore.swagger.io/v2
-    user-name: user
-    password: pass
+    base-url: ${PET_STORE_BASE_URL:https://petstore.swagger.io/v2}
+    user-name: ${PET_STORE_USERNAME:user}
+    password: ${PET_STORE_PASSWORD:pass}
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: method
+    doc-expansion: list
+  default-produces-media-type: application/json
