@@ -20,6 +20,18 @@ public class InventoryFacade {
         return inventoryService.isInStock(sku, quantity);
     }
 
+    public ProductResponse createProduct(CreateProductCommand command) {
+        return inventoryService.createProduct(command);
+    }
+
+    public ProductResponse updateProduct(String sku, UpdateProductCommand command) {
+        return inventoryService.updateProduct(sku, command);
+    }
+
+    public ProductResponse restockProduct(String sku, RestockProductCommand command) {
+        return inventoryService.restockProduct(sku, command);
+    }
+
     public ProductResponse getProductBySku(String sku) {
         return inventoryService.getProductBySku(sku);
     }

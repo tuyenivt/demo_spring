@@ -19,8 +19,7 @@ public class InventoryService {
 
     @Transactional
     public void reserveStock(ReserveStockCommand command) {
-        var product = productRepository.findBySku(command.sku())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + command.sku()));
+        var product = getProduct(command.sku());
 
         product.reserveStock(command.quantity());
         productRepository.save(product);
@@ -32,10 +31,45 @@ public class InventoryService {
         ));
     }
 
+    @Transactional
+    public void releaseStock(String sku, Integer quantity) {
+        var product = getProduct(sku);
+        product.releaseStock(quantity);
+        productRepository.save(product);
+    }
+
+    @Transactional(readOnly = true)
     public boolean isInStock(String sku, int quantity) {
         return productRepository.findBySku(sku)
                 .map(product -> product.hasStock(quantity))
                 .orElse(false);
+    }
+
+    @Transactional
+    public ProductResponse createProduct(CreateProductCommand command) {
+        if (productRepository.existsBySku(command.sku())) {
+            throw new DuplicateSkuException(command.sku());
+        }
+
+        var product = new Product(command.sku(), command.name(), command.price(), command.stockQuantity());
+        product = productRepository.save(product);
+        return mapToResponse(product);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(String sku, UpdateProductCommand command) {
+        var product = getProduct(sku);
+        product.updateDetails(command.name(), command.price());
+        product = productRepository.save(product);
+        return mapToResponse(product);
+    }
+
+    @Transactional
+    public ProductResponse restockProduct(String sku, RestockProductCommand command) {
+        var product = getProduct(sku);
+        product.restock(command.quantity());
+        product = productRepository.save(product);
+        return mapToResponse(product);
     }
 
     @Transactional(readOnly = true)

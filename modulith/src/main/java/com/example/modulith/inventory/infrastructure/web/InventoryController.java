@@ -44,4 +44,25 @@ class InventoryController {
     public ApiResponse<ProductResponse> getProduct(@PathVariable String sku) {
         return ApiResponse.success(inventoryFacade.getProductBySku(sku));
     }
+
+    @PostMapping("/products")
+    @Operation(summary = "Create product", description = "Creates a new product")
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody CreateProductCommand command) {
+        var response = inventoryFacade.createProduct(command);
+        return ResponseEntity.status(201).body(ApiResponse.success("Product created successfully", response));
+    }
+
+    @PutMapping("/products/{sku}")
+    @Operation(summary = "Update product", description = "Updates product name and price")
+    public ApiResponse<ProductResponse> updateProduct(@PathVariable String sku, @Valid @RequestBody UpdateProductCommand command) {
+        var response = inventoryFacade.updateProduct(sku, command);
+        return ApiResponse.success("Product updated successfully", response);
+    }
+
+    @PostMapping("/products/{sku}/restock")
+    @Operation(summary = "Restock product", description = "Increases product stock by quantity")
+    public ApiResponse<ProductResponse> restockProduct(@PathVariable String sku, @Valid @RequestBody RestockProductCommand command) {
+        var response = inventoryFacade.restockProduct(sku, command);
+        return ApiResponse.success("Product restocked successfully", response);
+    }
 }

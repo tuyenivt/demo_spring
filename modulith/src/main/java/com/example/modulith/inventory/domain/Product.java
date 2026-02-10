@@ -1,5 +1,6 @@
 package com.example.modulith.inventory.domain;
 
+import com.example.modulith.inventory.InsufficientStockException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -42,12 +43,21 @@ public class Product {
 
     public void reserveStock(int quantity) {
         if (!hasStock(quantity)) {
-            throw new IllegalStateException("Insufficient stock for product: " + sku);
+            throw new InsufficientStockException(sku, quantity, stockQuantity);
         }
         this.stockQuantity -= quantity;
     }
 
     public void releaseStock(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void updateDetails(String name, BigDecimal price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public void restock(int quantity) {
         this.stockQuantity += quantity;
     }
 }
