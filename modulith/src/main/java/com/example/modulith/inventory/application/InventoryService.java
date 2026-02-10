@@ -1,10 +1,12 @@
 package com.example.modulith.inventory.application;
 
-import com.example.modulith.inventory.ReserveStockCommand;
-import com.example.modulith.inventory.StockReservedEvent;
+import com.example.modulith.inventory.*;
+import com.example.modulith.inventory.domain.Product;
 import com.example.modulith.inventory.domain.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,5 +36,29 @@ public class InventoryService {
         return productRepository.findBySku(sku)
                 .map(product -> product.hasStock(quantity))
                 .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProductBySku(String sku) {
+        return mapToResponse(getProduct(sku));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> listProducts(Pageable pageable) {
+        return productRepository.findAll(pageable).map(this::mapToResponse);
+    }
+
+    private Product getProduct(String sku) {
+        return productRepository.findBySku(sku).orElseThrow(() -> new ProductNotFoundException(sku));
+    }
+
+    private ProductResponse mapToResponse(Product product) {
+        return ProductResponse.builder()
+                .id(product.getId())
+                .sku(product.getSku())
+                .name(product.getName())
+                .price(product.getPrice())
+                .stockQuantity(product.getStockQuantity())
+                .build();
     }
 }
