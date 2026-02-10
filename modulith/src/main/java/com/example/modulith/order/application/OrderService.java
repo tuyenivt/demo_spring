@@ -4,12 +4,15 @@ import com.example.modulith.customer.CustomerFacade;
 import com.example.modulith.order.*;
 import com.example.modulith.order.domain.Order;
 import com.example.modulith.order.domain.OrderRepository;
+import com.example.modulith.order.domain.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +58,56 @@ public class OrderService {
                 : orderRepository.findByCustomerId(customerId, pageable);
 
         return orders.map(this::mapToResponse);
+    }
+
+    @Transactional
+    public OrderResponse confirmOrder(Long orderId) {
+        var order = getOrderEntity(orderId);
+        try {
+            order.confirm();
+        } catch (IllegalStateException ex) {
+            throw new OrderStateTransitionException(order.getId(), order.getStatus().name(), "confirm");
+        }
+
+        order = orderRepository.save(order);
+        eventPublisher.publishEvent(new OrderConfirmedEvent(order.getId(), order.getSku(), order.getQuantity(), Instant.now()));
+        return mapToResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId) {
+        var order = getOrderEntity(orderId);
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            return mapToResponse(order);
+        }
+
+        try {
+            order.cancel();
+        } catch (IllegalStateException ex) {
+            throw new OrderStateTransitionException(order.getId(), order.getStatus().name(), "cancel");
+        }
+
+        order = orderRepository.save(order);
+        eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), order.getSku(), order.getQuantity(), Instant.now()));
+        return mapToResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse completeOrder(Long orderId) {
+        var order = getOrderEntity(orderId);
+        try {
+            order.complete();
+        } catch (IllegalStateException ex) {
+            throw new OrderStateTransitionException(order.getId(), order.getStatus().name(), "complete");
+        }
+
+        order = orderRepository.save(order);
+        eventPublisher.publishEvent(new OrderCompletedEvent(order.getId(), order.getSku(), order.getQuantity(), Instant.now()));
+        return mapToResponse(order);
+    }
+
+    private Order getOrderEntity(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
     }
 
     private OrderResponse mapToResponse(Order order) {

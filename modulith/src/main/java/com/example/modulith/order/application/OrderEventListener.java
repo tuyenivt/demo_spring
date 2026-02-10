@@ -1,6 +1,8 @@
 package com.example.modulith.order.application;
 
 import com.example.modulith.customer.CustomerRegisteredEvent;
+import com.example.modulith.order.StockReservationFailedEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
@@ -11,7 +13,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OrderEventListener {
+
+    private final OrderService orderService;
 
     @ApplicationModuleListener
     public void on(CustomerRegisteredEvent event) {
@@ -19,5 +24,12 @@ public class OrderEventListener {
 
         // Could send welcome discount, initialize customer preferences, etc.
         // This is decoupled - customer module doesn't know about order module
+    }
+
+    @ApplicationModuleListener
+    public void on(StockReservationFailedEvent event) {
+        log.warn("Stock reservation failed for order {} (sku={}, quantity={}): {}",
+                event.orderId(), event.sku(), event.quantity(), event.reason());
+        orderService.cancelOrder(event.orderId());
     }
 }

@@ -23,4 +23,16 @@ public class OrderFacade {
     public Page<OrderResponse> listOrders(Long customerId, Pageable pageable) {
         return orderService.listOrders(customerId, pageable);
     }
+
+    public OrderResponse confirmOrder(Long orderId) {
+        return orderService.confirmOrder(orderId);
+    }
+
+    public OrderResponse cancelOrder(Long orderId) {
+        return orderService.cancelOrder(orderId);
+    }
+
+    public OrderResponse completeOrder(Long orderId) {
+        return orderService.completeOrder(orderId);
+    }
 }

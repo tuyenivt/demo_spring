@@ -42,4 +42,25 @@ class OrderController {
         var response = orderFacade.listOrders(customerId, pageable);
         return ApiResponse.success(response);
     }
+
+    @PatchMapping("/{orderId}/confirm")
+    @Operation(summary = "Confirm order", description = "Confirms a pending order")
+    public ApiResponse<OrderResponse> confirmOrder(@PathVariable Long orderId) {
+        var response = orderFacade.confirmOrder(orderId);
+        return ApiResponse.success("Order confirmed", response);
+    }
+
+    @PatchMapping("/{orderId}/cancel")
+    @Operation(summary = "Cancel order", description = "Cancels a pending or confirmed order")
+    public ApiResponse<OrderResponse> cancelOrder(@PathVariable Long orderId) {
+        var response = orderFacade.cancelOrder(orderId);
+        return ApiResponse.success("Order cancelled", response);
+    }
+
+    @PatchMapping("/{orderId}/complete")
+    @Operation(summary = "Complete order", description = "Completes a confirmed order")
+    public ApiResponse<OrderResponse> completeOrder(@PathVariable Long orderId) {
+        var response = orderFacade.completeOrder(orderId);
+        return ApiResponse.success("Order completed", response);
+    }
 }
