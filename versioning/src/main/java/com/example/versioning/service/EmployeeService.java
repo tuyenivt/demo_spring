@@ -52,4 +52,17 @@ public class EmployeeService {
                         e.getStatus()
                 ));
     }
+
+    public List<EmployeeResponse> getEmployeesForView() {
+        return StreamSupport.stream(employeeRepository.findAll().spliterator(), false)
+                .map(e -> new EmployeeResponse(
+                        e.getId(),
+                        e.getName(),
+                        e.getDepartment(),
+                        e.getTitle(),
+                        e.getHireDate(),
+                        e.getStatus()
+                ))
+                .toList();
+    }
 }
