@@ -1,13 +1,13 @@
 package com.example.modulith.order.application;
 
 import com.example.modulith.customer.CustomerFacade;
-import com.example.modulith.order.CreateOrderCommand;
-import com.example.modulith.order.OrderCreatedEvent;
-import com.example.modulith.order.OrderResponse;
+import com.example.modulith.order.*;
 import com.example.modulith.order.domain.Order;
 import com.example.modulith.order.domain.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +39,22 @@ public class OrderService {
         ));
 
         return mapToResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getOrder(Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> listOrders(Long customerId, Pageable pageable) {
+        var orders = customerId == null
+                ? orderRepository.findAll(pageable)
+                : orderRepository.findByCustomerId(customerId, pageable);
+
+        return orders.map(this::mapToResponse);
     }
 
     private OrderResponse mapToResponse(Order order) {
