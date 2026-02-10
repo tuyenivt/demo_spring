@@ -1,12 +1,12 @@
 package com.example.modulith.customer.application;
 
-import com.example.modulith.customer.CustomerRegisteredEvent;
-import com.example.modulith.customer.CustomerResponse;
-import com.example.modulith.customer.RegisterCustomerCommand;
+import com.example.modulith.customer.*;
 import com.example.modulith.customer.domain.Customer;
 import com.example.modulith.customer.domain.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,7 @@ public class CustomerService {
     @Transactional
     public CustomerResponse registerCustomer(RegisterCustomerCommand command) {
         if (customerRepository.existsByEmail(command.email())) {
-            throw new IllegalArgumentException("Customer with email " + command.email() + " already exists");
+            throw new DuplicateEmailException(command.email());
         }
 
         var customer = new Customer(command.name(), command.email());
@@ -37,8 +37,21 @@ public class CustomerService {
         return mapToResponse(customer);
     }
 
+    @Transactional(readOnly = true)
     public boolean customerExists(Long customerId) {
         return customerRepository.existsById(customerId);
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerResponse getCustomer(Long customerId) {
+        return customerRepository.findById(customerId)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new CustomerNotFoundException(customerId));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CustomerResponse> listCustomers(Pageable pageable) {
+        return customerRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     private CustomerResponse mapToResponse(Customer customer) {

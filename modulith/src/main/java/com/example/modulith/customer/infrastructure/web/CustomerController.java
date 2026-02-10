@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +34,19 @@ class CustomerController {
     public ApiResponse<Boolean> customerExists(@PathVariable Long customerId) {
         var exists = customerFacade.customerExists(customerId);
         return ApiResponse.success(exists);
+    }
+
+    @GetMapping("/{customerId}")
+    @Operation(summary = "Get customer by ID", description = "Fetches customer details by ID")
+    public ApiResponse<CustomerResponse> getCustomer(@PathVariable Long customerId) {
+        var customer = customerFacade.getCustomer(customerId);
+        return ApiResponse.success(customer);
+    }
+
+    @GetMapping
+    @Operation(summary = "List customers", description = "Returns paginated list of customers")
+    public ApiResponse<Page<CustomerResponse>> listCustomers(Pageable pageable) {
+        var customers = customerFacade.listCustomers(pageable);
+        return ApiResponse.success(customers);
     }
 }
