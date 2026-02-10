@@ -1,21 +1,21 @@
 package com.example.versioning.service;
 
+import com.example.versioning.dto.EmployeeResponse;
 import com.example.versioning.dto.EmployeeResponseV1;
 import com.example.versioning.dto.EmployeeResponseV2;
 import com.example.versioning.repository.EmployeeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-
-    public EmployeeService(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
-    }
 
     public List<EmployeeResponseV1> getAllEmployeesV1() {
         return StreamSupport.stream(employeeRepository.findAll().spliterator(), false)
@@ -34,5 +34,22 @@ public class EmployeeService {
                         e.getStatus()
                 ))
                 .toList();
+    }
+
+    public Optional<EmployeeResponseV1> getEmployeeV1(Long id) {
+        return employeeRepository.findById(id)
+                .map(e -> new EmployeeResponseV1(e.getId(), e.getName(), e.getDepartment()));
+    }
+
+    public Optional<EmployeeResponseV2> getEmployeeV2(Long id) {
+        return employeeRepository.findById(id)
+                .map(e -> new EmployeeResponseV2(
+                        e.getId(),
+                        e.getName(),
+                        e.getTitle(),
+                        e.getDepartment(),
+                        e.getHireDate(),
+                        e.getStatus()
+                ));
     }
 }
