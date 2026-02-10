@@ -11,6 +11,8 @@ public record OrderResponse(
         Long customerId,
         String status,
         BigDecimal totalAmount,
+        String sku,
+        Integer quantity,
         Instant createdAt
 ) {
 }

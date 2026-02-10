@@ -26,13 +26,15 @@ public class OrderService {
             throw new IllegalArgumentException("Customer with ID " + command.customerId() + " does not exist");
         }
 
-        Order order = new Order(command.customerId(), command.totalAmount());
+        var order = new Order(command.customerId(), command.totalAmount(), command.sku(), command.quantity());
         order = orderRepository.save(order);
 
         eventPublisher.publishEvent(new OrderCreatedEvent(
                 order.getId(),
                 order.getCustomerId(),
                 order.getTotalAmount(),
+                order.getSku(),
+                order.getQuantity(),
                 order.getCreatedAt()
         ));
 
@@ -45,6 +47,8 @@ public class OrderService {
                 .customerId(order.getCustomerId())
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())
+                .sku(order.getSku())
+                .quantity(order.getQuantity())
                 .createdAt(order.getCreatedAt())
                 .build();
     }

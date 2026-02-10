@@ -29,11 +29,19 @@ public class Order {
     private BigDecimal totalAmount;
 
     @Column(nullable = false)
+    private String sku;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column(nullable = false)
     private Instant createdAt;
 
-    public Order(Long customerId, BigDecimal totalAmount) {
+    public Order(Long customerId, BigDecimal totalAmount, String sku, Integer quantity) {
         this.customerId = customerId;
         this.totalAmount = totalAmount;
+        this.sku = sku;
+        this.quantity = quantity;
         this.status = OrderStatus.PENDING;
         this.createdAt = Instant.now();
     }

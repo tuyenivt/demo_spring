@@ -1,0 +1,5 @@
+ALTER TABLE orders
+    ADD COLUMN sku VARCHAR(100) NOT NULL DEFAULT 'UNKNOWN',
+    ADD COLUMN quantity INT NOT NULL DEFAULT 1;
+
+CREATE INDEX idx_orders_sku ON orders (sku);
