@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
         log.warn("Validation failed: {} errors", validationErrors.size());
 
-        ErrorResponse error = ErrorResponse.builder()
+        var error = ErrorResponse.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Failed")
@@ -71,13 +71,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex,
-            HttpServletRequest request) {
-
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Internal server error", ex);
 
-        ErrorResponse error = ErrorResponse.builder()
+        var error = ErrorResponse.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
@@ -88,11 +85,45 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
+        var status = mapDomainExceptionStatus(ex);
+        log.warn("Domain/runtime exception: {}", ex.getMessage());
+
+        var error = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
     private ErrorResponse.ValidationError mapFieldError(FieldError fieldError) {
         return ErrorResponse.ValidationError.builder()
                 .field(fieldError.getField())
                 .message(fieldError.getDefaultMessage())
                 .rejectedValue(fieldError.getRejectedValue())
                 .build();
+    }
+
+    private HttpStatus mapDomainExceptionStatus(RuntimeException ex) {
+        var simpleName = ex.getClass().getSimpleName();
+
+        if (simpleName.endsWith("NotFoundException")) {
+            return HttpStatus.NOT_FOUND;
+        }
+        if (simpleName.equals("OrderStateTransitionException")) {
+            return HttpStatus.UNPROCESSABLE_ENTITY;
+        }
+        if (simpleName.equals("DuplicateEmailException")
+                || simpleName.equals("DuplicateSkuException")
+                || simpleName.equals("InsufficientStockException")) {
+            return HttpStatus.CONFLICT;
+        }
+
+        return HttpStatus.BAD_REQUEST;
     }
 }
