@@ -19,6 +19,7 @@ const Destinations = {
   USER_QUEUE_ERRORS: "/user/queue/errors",
   APP_CHAT_SEND: "/app/chat.send",
   APP_CHAT_PRIVATE: "/app/chat.private",
+  APP_HISTORY: "/app/history",
 };
 
 const SystemMessages = {
@@ -131,6 +132,11 @@ function onConnected() {
   stompClient.subscribe(Destinations.USER_QUEUE_ERRORS, (message) => {
     console.log("[Received] Error:", message);
     onErrorReceived(message);
+  });
+
+  stompClient.subscribe(Destinations.APP_HISTORY, (message) => {
+    console.log("[Received] History:", message);
+    onHistoryReceived(message);
   });
 
   console.log("[WebSocket] All subscriptions active");
@@ -331,6 +337,20 @@ function onErrorReceived(payload) {
 }
 
 /**
+ * Handle received history payload (list of ChatResponse).
+ */
+function onHistoryReceived(payload) {
+  const history = JSON.parse(payload.body);
+  if (!Array.isArray(history) || history.length === 0) {
+    return;
+  }
+
+  displayHistoryDivider(`Loaded ${history.length} recent messages`);
+  history.forEach((message) => displayMessage(message, true));
+  displayHistoryDivider("Live messages");
+}
+
+/**
  * Parse notification to extract user join/leave events
  */
 function parseUserNotification(content) {
@@ -358,9 +378,9 @@ function parseUserNotification(content) {
 /**
  * Display broadcast message in chat area
  */
-function displayMessage(message) {
+function displayMessage(message, isHistory = false) {
   const messageDiv = document.createElement("div");
-  messageDiv.className = "message";
+  messageDiv.className = "message" + (isHistory ? " history" : "");
 
   const time = new Date(message.timestamp).toLocaleTimeString();
 
@@ -373,6 +393,14 @@ function displayMessage(message) {
     `;
 
   chatArea.appendChild(messageDiv);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function displayHistoryDivider(text) {
+  const divider = document.createElement("div");
+  divider.className = "history-divider";
+  divider.textContent = text;
+  chatArea.appendChild(divider);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 

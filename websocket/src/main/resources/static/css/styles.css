@@ -150,6 +150,10 @@ body {
   border-left: 3px solid #ffc107;
 }
 
+.message.history {
+  opacity: 0.85;
+}
+
 .message-header {
   display: flex;
   justify-content: space-between;
@@ -254,4 +258,13 @@ button:disabled {
   font-size: 0.8em;
   color: #666;
   border-radius: 3px;
+}
+
+.history-divider {
+  margin: 12px 0;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #667;
+  text-align: center;
 }

@@ -23,6 +23,7 @@ public final class WebSocketDestinations {
     // Application destinations (client sends to these)
     public static final String SEND_MESSAGE = "/chat.send";
     public static final String SEND_PRIVATE_MESSAGE = "/chat.private";
+    public static final String SUBSCRIBE_HISTORY = "/history";
 
     // Broker destinations (server broadcasts to these)
     public static final String TOPIC_MESSAGES = "/topic/messages";

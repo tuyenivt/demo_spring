@@ -2,6 +2,7 @@ package com.example.websocket.handler;
 
 import com.example.websocket.dto.ChatMessage;
 import com.example.websocket.dto.ChatResponse;
+import com.example.websocket.service.MessageHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -23,6 +24,7 @@ import static com.example.websocket.constant.WebSocketDestinations.*;
 public class MessageBroadcastHandler {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final MessageHistoryService messageHistoryService;
 
     /**
      * Broadcast message to all subscribers of /topic/messages
@@ -32,6 +34,7 @@ public class MessageBroadcastHandler {
      */
     public void broadcastMessage(ChatMessage message) {
         var response = new ChatResponse(message.username(), message.content(), Instant.now(), MESSAGE_TYPE_BROADCAST);
+        messageHistoryService.add(response);
 
         log.info("Broadcasting message to {}: {}", TOPIC_MESSAGES, response);
 

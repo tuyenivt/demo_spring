@@ -3,6 +3,7 @@ package com.example.websocket.controller;
 import com.example.websocket.dto.ChatMessage;
 import com.example.websocket.dto.ChatResponse;
 import com.example.websocket.handler.MessageBroadcastHandler;
+import com.example.websocket.service.MessageHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -10,6 +11,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 import static com.example.websocket.constant.WebSocketDestinations.*;
 
@@ -25,6 +28,7 @@ import static com.example.websocket.constant.WebSocketDestinations.*;
 public class ChatController {
 
     private final MessageBroadcastHandler broadcastHandler;
+    private final MessageHistoryService messageHistoryService;
 
     /**
      * Handle chat messages sent to /app/chat.send
@@ -87,6 +91,14 @@ public class ChatController {
     }
 
     /**
+     * Return recent broadcast messages when a client subscribes to /app/history.
+     */
+    @SubscribeMapping(SUBSCRIBE_HISTORY)
+    public List<ChatResponse> handleHistorySubscription() {
+        return messageHistoryService.getRecentMessages();
+    }
+
+    /**
      * Store username in WebSocket session attributes.
      * <p>
      * This allows us to identify users during connect/disconnect events.
@@ -99,10 +111,6 @@ public class ChatController {
             if (existingUsername == null) {
                 headerAccessor.getSessionAttributes().put("username", username);
                 log.debug("Stored username '{}' in session", username);
-
-                // Broadcast join notification
-                var message = String.format(MSG_USER_JOINED, username);
-                broadcastHandler.broadcastSystemNotification(message);
             }
         }
     }
