@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,5 +83,52 @@ class RateLimitIntegrationTest {
             var response = restTemplate.exchange("/api/hello", HttpMethod.GET, entity, String.class);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
+    }
+
+    @Test
+    void shouldHandleConcurrentRequests() throws Exception {
+        // Use a unique user per test run to avoid interference from other tests
+        var userId = "concurrent-user-" + UUID.randomUUID();
+        var headers = new HttpHeaders();
+        headers.set("X-USER-ID", userId);
+        var entity = new HttpEntity<>(headers);
+
+        int totalRequests = 20;
+        var executor = Executors.newFixedThreadPool(totalRequests);
+        List<CompletableFuture<ResponseEntity<String>>> futures = IntStream.range(0, totalRequests)
+                .mapToObj(i -> CompletableFuture.supplyAsync(
+                        () -> restTemplate.exchange("/api/orders", HttpMethod.GET, entity, String.class),
+                        executor))
+                .toList();
+
+        var results = futures.stream().map(CompletableFuture::join).toList();
+        executor.shutdown();
+
+        long okCount = results.stream().filter(r -> r.getStatusCode() == HttpStatus.OK).count();
+        long rejectedCount = results.stream().filter(r -> r.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS).count();
+
+        assertThat(okCount).isEqualTo(5);
+        assertThat(rejectedCount).isEqualTo(15);
+    }
+
+    @Test
+    void shouldReturnStatusWithoutConsumingToken() {
+        var headers = new HttpHeaders();
+        headers.set("X-USER-ID", "status-check-user-" + UUID.randomUUID());
+        var entity = new HttpEntity<>(headers);
+
+        // First, consume one token via real endpoint
+        restTemplate.exchange("/api/orders", HttpMethod.GET, entity, String.class);
+
+        // Status endpoint should reflect remaining without consuming further
+        var statusBefore = restTemplate.exchange("/api/rate-limit/status?profile=strict", HttpMethod.GET, entity, String.class);
+        assertThat(statusBefore.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        var statusAfter = restTemplate.exchange("/api/rate-limit/status?profile=strict", HttpMethod.GET, entity, String.class);
+        assertThat(statusAfter.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Body should contain remaining and limit fields
+        assertThat(statusBefore.getBody()).contains("remaining");
+        assertThat(statusBefore.getBody()).contains("\"limit\":5");
     }
 }
