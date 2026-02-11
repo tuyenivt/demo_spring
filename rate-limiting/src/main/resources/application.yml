@@ -16,3 +16,18 @@ spring:
         max-idle: 5
         min-idle: 0
         max-wait: 2s
+
+rate-limiting:
+  profiles:
+    strict:
+      limit: 5
+      duration-seconds: 60
+      strategy: INTERVALLY
+    standard:
+      limit: 20
+      duration-seconds: 60
+      strategy: GREEDY
+    relaxed:
+      limit: 100
+      duration-seconds: 3600
+      strategy: INTERVALLY
