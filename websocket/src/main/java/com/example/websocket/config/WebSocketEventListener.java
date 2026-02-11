@@ -4,11 +4,13 @@ import com.example.websocket.handler.MessageBroadcastHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.security.Principal;
+
+import static com.example.websocket.constant.WebSocketDestinations.MSG_USER_JOINED;
 import static com.example.websocket.constant.WebSocketDestinations.MSG_USER_LEFT;
 import static com.example.websocket.constant.WebSocketDestinations.UNKNOWN_SENDER;
 
@@ -30,20 +32,12 @@ public class WebSocketEventListener {
      * Triggered when a client successfully establishes a WebSocket connection.
      */
     @EventListener
-    public void handleWebSocketConnectListener(SessionConnectEvent event) {
-        var headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        var sessionId = headerAccessor.getSessionId();
+    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+        var sessionId = event.getMessage().getHeaders().get("simpSessionId");
+        var username = extractUsername(event.getUser());
 
-        log.info("New WebSocket connection - Session ID: {}", sessionId);
-
-        // Get username from session attributes if available
-        var username = getUsernameFromSession(headerAccessor);
-
-        if (username != null) {
-            var message = String.format("User '%s' joined the chat", username);
-            broadcastHandler.broadcastSystemNotification(message);
-            log.info("User connected: {}", username);
-        }
+        log.info("New WebSocket connection - Session ID: {}, User: {}", sessionId, username);
+        broadcastHandler.broadcastSystemNotification(String.format(MSG_USER_JOINED, username));
     }
 
     /**
@@ -53,28 +47,22 @@ public class WebSocketEventListener {
      */
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        var headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        var sessionId = headerAccessor.getSessionId();
+        var sessionId = event.getSessionId();
+        var username = extractUsername(event.getUser());
 
-        log.info("WebSocket disconnection - Session ID: {}", sessionId);
-
-        // Get username from session attributes
-        var username = getUsernameFromSession(headerAccessor);
-
-        if (username != null) {
-            var message = String.format(MSG_USER_LEFT, username);
-            broadcastHandler.broadcastSystemNotification(message);
-            log.info("User disconnected: {}", username);
-        }
+        log.info("WebSocket disconnection - Session ID: {}, User: {}, CloseStatus: {}", sessionId, username, event.getCloseStatus());
+        broadcastHandler.broadcastSystemNotification(String.format(MSG_USER_LEFT, username));
     }
 
     /**
-     * Extract username from session attributes.
+     * Extract username from authenticated principal.
      *
      * @return username or null if not found
      */
-    private String getUsernameFromSession(StompHeaderAccessor headerAccessor) {
-        var sessionAttributes = headerAccessor.getSessionAttributes();
-        return sessionAttributes == null ? UNKNOWN_SENDER : (String) sessionAttributes.get("username");
+    private String extractUsername(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            return UNKNOWN_SENDER;
+        }
+        return principal.getName();
     }
 }

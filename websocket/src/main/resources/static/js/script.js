@@ -24,6 +24,8 @@ const Destinations = {
 const SystemMessages = {
   CONNECTED: "Connected to WebSocket server",
   DISCONNECTED: "Disconnected from server",
+  RECONNECTING: "Connection lost. Reconnecting in ",
+  RECONNECTED: "Reconnected to WebSocket server",
   CONNECTION_FAILED: "Connection failed: ",
   ENTER_USERNAME: "Please enter a username",
 };
@@ -36,6 +38,10 @@ let isConnected = false;
 let currentUsername = null;
 let selectedUser = null;
 let onlineUsers = new Set();
+let reconnectAttempts = 0;
+let reconnectTimerId = null;
+let manualDisconnect = false;
+const maxReconnectDelayMs = 30000;
 
 // DOM elements
 const statusDot = document.getElementById("statusDot");
@@ -66,9 +72,12 @@ function connect() {
     return;
   }
 
+  clearReconnectTimer();
+  manualDisconnect = false;
   currentUsername = username;
   const socket = new SockJS("/ws");
   stompClient = StompJs.Stomp.over(socket);
+  socket.onclose = () => handleSocketClosed();
 
   // Match server heartbeat expectations.
   stompClient.heartbeat.outgoing = 10000;
@@ -93,6 +102,8 @@ function connect() {
  */
 function onConnected() {
   console.log("[WebSocket] Connected successfully");
+  const wasReconnecting = reconnectAttempts > 0;
+  reconnectAttempts = 0;
   isConnected = true;
   updateConnectionStatus(true);
 
@@ -123,7 +134,9 @@ function onConnected() {
   });
 
   console.log("[WebSocket] All subscriptions active");
-  addSystemMessage(SystemMessages.CONNECTED);
+  addSystemMessage(
+    wasReconnecting ? SystemMessages.RECONNECTED : SystemMessages.CONNECTED,
+  );
   addDebugInfo(`Subscribed to: ${Destinations.USER_QUEUE_PRIVATE}`);
 
   // Add self to user list
@@ -137,12 +150,15 @@ function onError(error) {
   console.error("[WebSocket] Connection error:", error);
   updateConnectionStatus(false);
   addSystemMessage(SystemMessages.CONNECTION_FAILED + error, true);
+  scheduleReconnect();
 }
 
 /**
  * Disconnect from WebSocket
  */
 function disconnect() {
+  manualDisconnect = true;
+  clearReconnectTimer();
   if (stompClient !== null) {
     stompClient.disconnect(() => {
       console.log("[WebSocket] Disconnected");
@@ -154,6 +170,44 @@ function disconnect() {
       selectedUser = null;
       updateModeIndicator();
     });
+  }
+}
+
+function handleSocketClosed() {
+  if (manualDisconnect) {
+    return;
+  }
+
+  if (isConnected) {
+    isConnected = false;
+    updateConnectionStatus(false);
+  }
+
+  scheduleReconnect();
+}
+
+function scheduleReconnect() {
+  if (manualDisconnect || reconnectTimerId !== null || !currentUsername) {
+    return;
+  }
+
+  const delay = Math.min(1000 * 2 ** reconnectAttempts, maxReconnectDelayMs);
+  reconnectAttempts += 1;
+
+  const waitSeconds = Math.ceil(delay / 1000);
+  statusText.textContent = `Reconnecting in ${waitSeconds}s`;
+  addSystemMessage(`${SystemMessages.RECONNECTING}${waitSeconds}s...`, true);
+
+  reconnectTimerId = window.setTimeout(() => {
+    reconnectTimerId = null;
+    connect();
+  }, delay);
+}
+
+function clearReconnectTimer() {
+  if (reconnectTimerId !== null) {
+    window.clearTimeout(reconnectTimerId);
+    reconnectTimerId = null;
   }
 }
 
