@@ -1,8 +1,11 @@
 package com.example.websocket.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
@@ -35,7 +38,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // Enable simple in-memory message broker
         // Messages sent to /topic or /queue will be broadcast to subscribers
-        config.enableSimpleBroker(TOPIC_DESTINATION_PREFIX, QUEUE_DESTINATION_PREFIX);
+        config.enableSimpleBroker(TOPIC_DESTINATION_PREFIX, QUEUE_DESTINATION_PREFIX)
+                .setTaskScheduler(brokerTaskScheduler())
+                .setHeartbeatValue(new long[]{10000, 10000});
 
         // Prefix for application destination mappings
         // Client sends to /app/chat.send → routes to @MessageMapping("/chat.send")
@@ -58,7 +63,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(WEBSOCKET_ENDPOINT)
                 .setAllowedOriginPatterns("*") // In production, specify exact origins
-                .withSockJS(); // Enable SockJS fallback
+                .withSockJS()
+                .setHeartbeatTime(25_000); // Enable SockJS fallback
     }
 
     @Override
@@ -78,5 +84,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new UserAuthChannelInterceptor());
+    }
+
+    @Bean
+    public TaskScheduler brokerTaskScheduler() {
+        var scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("ws-heartbeat-");
+        scheduler.initialize();
+        return scheduler;
     }
 }

@@ -70,6 +70,10 @@ function connect() {
   const socket = new SockJS("/ws");
   stompClient = StompJs.Stomp.over(socket);
 
+  // Match server heartbeat expectations.
+  stompClient.heartbeat.outgoing = 10000;
+  stompClient.heartbeat.incoming = 10000;
+
   // Enable debug for troubleshooting
   stompClient.debug = (str) => {
     console.log("[STOMP]", str);
