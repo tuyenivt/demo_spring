@@ -46,4 +46,5 @@ public final class WebSocketDestinations {
     public static final String MSG_NEW_MESSAGE_FROM = "New message from %s";
     public static final String MSG_USER_JOINED = "User '%s' joined the chat";
     public static final String MSG_USER_LEFT = "User '%s' left the chat";
+    public static final String MSG_SERVER_SHUTTING_DOWN = "Server is shutting down. Please reconnect shortly.";
 }
