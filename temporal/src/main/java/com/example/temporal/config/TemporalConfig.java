@@ -3,10 +3,7 @@ package com.example.temporal.config;
 import com.example.temporal.activities.impl.OrderActivitiesImpl;
 import com.example.temporal.activities.impl.PaymentActivitiesImpl;
 import com.example.temporal.activities.impl.ReportActivitiesImpl;
-import com.example.temporal.workflows.impl.InventoryChildWorkflowImpl;
-import com.example.temporal.workflows.impl.OrderWorkflowImpl;
-import com.example.temporal.workflows.impl.PaymentChildWorkflowImpl;
-import com.example.temporal.workflows.impl.ReportWorkflowImpl;
+import com.example.temporal.workflows.impl.*;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowClientOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
@@ -134,7 +131,9 @@ public class TemporalConfig {
                 OrderWorkflowImpl.class,
                 PaymentChildWorkflowImpl.class,
                 InventoryChildWorkflowImpl.class,
-                ReportWorkflowImpl.class);
+                ReportWorkflowImpl.class,
+                PollingWorkflowImpl.class
+        );
 
         // Register activity implementations
         // These perform actual I/O operations - can be non-deterministic
