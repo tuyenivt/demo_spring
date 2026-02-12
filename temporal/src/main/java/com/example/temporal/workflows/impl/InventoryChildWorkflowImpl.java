@@ -1,6 +1,7 @@
 package com.example.temporal.workflows.impl;
 
 import com.example.temporal.activities.OrderActivities;
+import com.example.temporal.exception.OrderValidationException;
 import com.example.temporal.workflows.InventoryChildWorkflow;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
@@ -21,6 +22,7 @@ public class InventoryChildWorkflowImpl implements InventoryChildWorkflow {
                     .setInitialInterval(Duration.ofSeconds(1))
                     .setBackoffCoefficient(2.0)
                     .setMaximumAttempts(3)
+                    .setDoNotRetry(OrderValidationException.class.getName())
                     .build())
             .build();
 

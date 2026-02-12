@@ -2,6 +2,7 @@ package com.example.temporal.workflows.impl;
 
 import com.example.temporal.activities.OrderActivities;
 import com.example.temporal.activities.PaymentActivities;
+import com.example.temporal.exception.OrderValidationException;
 import com.example.temporal.workflows.InventoryChildWorkflow;
 import com.example.temporal.workflows.OrderWorkflow;
 import com.example.temporal.workflows.PaymentChildWorkflow;
@@ -57,6 +58,11 @@ public class OrderWorkflowImpl implements OrderWorkflow {
 
     /**
      * Activity options with retry policy.
+     * <p>
+     * NON-RETRYABLE EXCEPTIONS:
+     * OrderValidationException represents a permanent business rule failure.
+     * There is no point retrying invalid input — the result is always the same.
+     * Temporal will fail the activity immediately without consuming retry attempts.
      */
     private final ActivityOptions activityOptions = ActivityOptions.newBuilder()
             .setStartToCloseTimeout(Duration.ofSeconds(30))
@@ -65,6 +71,7 @@ public class OrderWorkflowImpl implements OrderWorkflow {
                     .setBackoffCoefficient(2.0)
                     .setMaximumInterval(Duration.ofSeconds(10))
                     .setMaximumAttempts(3)
+                    .setDoNotRetry(OrderValidationException.class.getName())
                     .build())
             .build();
 

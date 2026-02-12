@@ -2,6 +2,8 @@ package com.example.temporal.activities.impl;
 
 import com.example.temporal.activities.OrderActivities;
 import com.example.temporal.exception.OrderActivitiesException;
+import com.example.temporal.exception.OrderValidationException;
+import io.temporal.failure.ApplicationFailure;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +39,13 @@ public class OrderActivitiesImpl implements OrderActivities {
     public void validateOrder(String orderId, long amount) {
         log.info("Validating order: orderId={}, amount={}", orderId, amount);
 
-        // Simulate validation logic
+        // Permanent failure: invalid business data - do NOT retry.
+        // ApplicationFailure.newNonRetryableFailure() signals Temporal to skip retries
+        // entirely and fail the activity immediately, propagating to the workflow.
         if (amount <= 0) {
-            throw new IllegalArgumentException("Invalid amount: " + amount);
+            throw ApplicationFailure.newNonRetryableFailure(
+                    "Invalid amount: " + amount,
+                    OrderValidationException.class.getName());
         }
 
         // Simulate occasional transient failure to demonstrate retry
