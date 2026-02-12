@@ -2,9 +2,11 @@ package com.example.temporal.config;
 
 import com.example.temporal.activities.impl.OrderActivitiesImpl;
 import com.example.temporal.activities.impl.PaymentActivitiesImpl;
+import com.example.temporal.activities.impl.ReportActivitiesImpl;
 import com.example.temporal.workflows.impl.InventoryChildWorkflowImpl;
 import com.example.temporal.workflows.impl.OrderWorkflowImpl;
 import com.example.temporal.workflows.impl.PaymentChildWorkflowImpl;
+import com.example.temporal.workflows.impl.ReportWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowClientOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
@@ -110,7 +112,10 @@ public class TemporalConfig {
      * - For this demo: 30s is sufficient for our workflows
      */
     @Bean
-    public WorkerFactory workerFactory(WorkflowClient workflowClient, OrderActivitiesImpl orderActivities, PaymentActivitiesImpl paymentActivities) {
+    public WorkerFactory workerFactory(WorkflowClient workflowClient,
+                                       OrderActivitiesImpl orderActivities,
+                                       PaymentActivitiesImpl paymentActivities,
+                                       ReportActivitiesImpl reportActivities) {
         workerFactory = WorkerFactory.newInstance(workflowClient, WorkerFactoryOptions.newBuilder().setUsingVirtualWorkflowThreads(true).build());
 
         var workerOptions = WorkerOptions.newBuilder()
@@ -125,11 +130,15 @@ public class TemporalConfig {
 
         // Register workflow implementations
         // These are the orchestration logic - must be deterministic
-        worker.registerWorkflowImplementationTypes(OrderWorkflowImpl.class, PaymentChildWorkflowImpl.class, InventoryChildWorkflowImpl.class);
+        worker.registerWorkflowImplementationTypes(
+                OrderWorkflowImpl.class,
+                PaymentChildWorkflowImpl.class,
+                InventoryChildWorkflowImpl.class,
+                ReportWorkflowImpl.class);
 
         // Register activity implementations
         // These perform actual I/O operations - can be non-deterministic
-        worker.registerActivitiesImplementations(orderActivities, paymentActivities);
+        worker.registerActivitiesImplementations(orderActivities, paymentActivities, reportActivities);
 
         // Start all workers
         workerFactory.start();
