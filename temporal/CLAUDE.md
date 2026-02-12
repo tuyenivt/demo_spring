@@ -78,6 +78,14 @@ temporal/
 | POST   | `/api/reports/start` | Start daily cron (9 AM UTC) |
 | DELETE | `/api/reports/stop`  | Terminate cron workflow     |
 
+### Polling Workflow (Continue-As-New)
+
+| Method | Endpoint                         | Description                   |
+|--------|----------------------------------|-------------------------------|
+| POST   | `/api/polling/start?targetId=`   | Start polling workflow        |
+| GET    | `/api/polling/{targetId}/status` | Query current iteration count |
+| DELETE | `/api/polling/{targetId}/stop`   | Terminate polling workflow    |
+
 ## Configuration
 
 ```yaml

@@ -175,6 +175,27 @@ curl -X POST http://localhost:8080/api/reports/start
 curl -X DELETE http://localhost:8080/api/reports/stop
 ```
 
+### Polling Workflow (Continue-As-New)
+
+Demonstrates `Workflow.continueAsNew()` — resets event history every 10 iterations to prevent unbounded growth.
+
+| Method | Endpoint                         | Description                    |
+|--------|----------------------------------|--------------------------------|
+| POST   | `/api/polling/start?targetId=`   | Start polling workflow         |
+| GET    | `/api/polling/{targetId}/status` | Query current iteration count  |
+| DELETE | `/api/polling/{targetId}/stop`   | Terminate the polling workflow |
+
+```bash
+# Start polling (resets history every 10 iterations, stops at 50)
+curl -X POST "http://localhost:8080/api/polling/start?targetId=resource-42"
+
+# Check iteration count
+curl http://localhost:8080/api/polling/resource-42/status
+
+# Stop polling
+curl -X DELETE http://localhost:8080/api/polling/resource-42/stop
+```
+
 ## Key Features
 
 | Feature           | Description                                                                      |
