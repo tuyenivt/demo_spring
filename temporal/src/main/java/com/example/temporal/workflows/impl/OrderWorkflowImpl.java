@@ -193,6 +193,18 @@ public class OrderWorkflowImpl implements OrderWorkflow {
             activities.sendNotification(customerId, notificationMessage);
             log.info("Notification sent successfully");
 
+            // WORKFLOW TIMER DEMO: durable sleep before shipping reminder.
+            // Workflow.sleep() is fundamentally different from Thread.sleep():
+            // - It is persisted in Temporal's event history
+            // - It survives worker restarts and process failures
+            // - Time is skipped instantly in TestWorkflowEnvironment (no real waiting)
+            // - Use Workflow.currentTimeMillis() (not System.currentTimeMillis()) for time reads
+            log.info("Timer started: shipping reminder will fire in 24 hours (skipped in tests)");
+            Workflow.sleep(Duration.ofHours(24));
+
+            // After durable 24-hour delay, send the shipping reminder
+            activities.sendNotification(customerId, "Your order " + orderId + " ships today!");
+
             // Success - clear compensations (no longer needed)
             compensations.clear();
 
