@@ -6,6 +6,7 @@ import com.example.temporal.dto.OrderRequest;
 import com.example.temporal.dto.OrderResponse;
 import com.example.temporal.workflows.OrderWorkflow;
 import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowNotFoundException;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.common.RetryOptions;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -164,6 +166,93 @@ public class OrderController {
             log.error("Failed to get workflow status: orderId={}, error={}", orderId, e.getMessage());
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Workflow not found: " + orderId));
+        }
+    }
+
+    /**
+     * Send a cancel signal to a running order workflow.
+     * <p>
+     * Signals are fire-and-forget — the workflow receives the signal asynchronously
+     * and decides how to handle it. Returns 202 Accepted immediately.
+     * <p>
+     * curl -X POST http://localhost:8080/api/orders/{orderId}/cancel \
+     * -H "Content-Type: application/json" \
+     * -d '{"reason":"Customer requested cancellation"}'
+     */
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable String orderId, @RequestBody Map<String, String> body) {
+        var workflowId = "order-workflow-" + orderId;
+        var reason = body.getOrDefault("reason", "No reason provided");
+
+        log.info("Sending cancel signal: orderId={}, reason={}", orderId, reason);
+
+        try {
+            var stub = workflowClient.newWorkflowStub(OrderWorkflow.class, workflowId);
+            stub.cancelOrder(reason);
+            log.info("Cancel signal sent successfully for orderId={}", orderId);
+            return ResponseEntity.accepted().body(Map.of("message", "Cancel signal sent", "orderId", orderId));
+        } catch (WorkflowNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Workflow not found: " + orderId));
+        } catch (Exception e) {
+            log.error("Failed to send cancel signal: orderId={}, error={}", orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to send cancel signal: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Send an updateShippingAddress signal to a running order workflow.
+     * <p>
+     * curl -X PUT http://localhost:8080/api/orders/{orderId}/shipping-address \
+     * -H "Content-Type: application/json" \
+     * -d '{"address":"123 New Street, Springfield"}'
+     */
+    @PutMapping("/{orderId}/shipping-address")
+    public ResponseEntity<?> updateShippingAddress(@PathVariable String orderId, @RequestBody Map<String, String> body) {
+        var workflowId = "order-workflow-" + orderId;
+        var address = body.get("address");
+
+        if (address == null || address.isBlank()) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("address field is required"));
+        }
+
+        log.info("Sending shipping address update signal: orderId={}, address={}", orderId, address);
+
+        try {
+            var stub = workflowClient.newWorkflowStub(OrderWorkflow.class, workflowId);
+            stub.updateShippingAddress(address);
+            log.info("Shipping address update signal sent for orderId={}", orderId);
+            return ResponseEntity.accepted().body(Map.of("message", "Shipping address update signal sent", "orderId", orderId));
+        } catch (WorkflowNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Workflow not found: " + orderId));
+        } catch (Exception e) {
+            log.error("Failed to send shipping address signal: orderId={}, error={}", orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to send signal: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Query the shipping address from a running or recently completed order workflow.
+     * <p>
+     * Queries are read-only and return immediately — they don't affect workflow execution.
+     * <p>
+     * curl http://localhost:8080/api/orders/{orderId}/shipping-address
+     */
+    @GetMapping("/{orderId}/shipping-address")
+    public ResponseEntity<?> getShippingAddress(@PathVariable String orderId) {
+        var workflowId = "order-workflow-" + orderId;
+
+        try {
+            var stub = workflowClient.newWorkflowStub(OrderWorkflow.class, workflowId);
+            var address = stub.getShippingAddress();
+            return ResponseEntity.ok(Map.of("orderId", orderId, "shippingAddress", address != null ? address : "not set"));
+        } catch (WorkflowNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Workflow not found: " + orderId));
+        } catch (Exception e) {
+            log.error("Failed to query shipping address: orderId={}, error={}", orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to query: " + e.getMessage()));
         }
     }
 

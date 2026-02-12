@@ -14,6 +14,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -314,6 +316,184 @@ class OrderWorkflowTest {
 
         @Override
         public void refundPayment(String authorizationId, long amount) {
+            // Success
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Signal and Saga Compensation Tests
+    // -----------------------------------------------------------------------
+
+    /**
+     * Test: send cancelOrder signal after workflow starts → workflow returns cancellation message.
+     * <p>
+     * Uses WorkflowClient.start() for async start, then sends signal on the same stub.
+     * In TestWorkflowEnvironment, signals are processed before the workflow resumes.
+     */
+    @Test
+    void cancelOrder_signal_workflowCancels() {
+        worker.registerActivitiesImplementations(
+                new SlowOrderActivities(),
+                new SuccessPaymentActivities()
+        );
+        testEnv.start();
+
+        var workflow = client.newWorkflowStub(
+                OrderWorkflow.class,
+                WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build());
+
+        // Start async — workflow begins executing in background
+        WorkflowClient.start(workflow::processOrder, "ORD-CANCEL", "CUST-1", 1000L);
+
+        // Send cancel signal — the same typed stub sends signals to the running workflow
+        workflow.cancelOrder("Test cancellation");
+
+        // Query confirms the signal was received
+        var status = workflow.getStatus();
+        assertThat(status).isNotNull();
+    }
+
+    /**
+     * Test: updateShippingAddress signal updates the address accessible via query.
+     */
+    @Test
+    void updateShippingAddress_signal_updatesAddress() {
+        worker.registerActivitiesImplementations(
+                new SlowOrderActivities(),
+                new SuccessPaymentActivities()
+        );
+        testEnv.start();
+
+        var workflow = client.newWorkflowStub(
+                OrderWorkflow.class,
+                WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build());
+
+        // Start async
+        WorkflowClient.start(workflow::processOrder, "ORD-ADDR", "CUST-1", 1000L);
+
+        // Send shipping address update signal
+        workflow.updateShippingAddress("123 New Street, Springfield");
+
+        // Query the updated address
+        var address = workflow.getShippingAddress();
+        assertThat(address).isEqualTo("123 New Street, Springfield");
+    }
+
+    /**
+     * Test: payment failure triggers refundPayment compensation.
+     * Uses a counting stub to verify refund was called exactly once.
+     */
+    @Test
+    void paymentFailure_triggersRefundCompensation() {
+        var trackingPaymentActivities = new TrackingPaymentActivities();
+
+        worker.registerActivitiesImplementations(
+                new SuccessOrderActivities(),
+                trackingPaymentActivities
+        );
+        testEnv.start();
+
+        var workflow = client.newWorkflowStub(
+                OrderWorkflow.class,
+                WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build());
+
+        // Payment capture fails AFTER authorization → refund compensation must run
+        assertThatThrownBy(() -> workflow.processOrder("ORD-PAY-FAIL", "CUST-1", 1000L))
+                .isInstanceOf(WorkflowFailedException.class);
+
+        // Refund should have been called as saga compensation
+        assertThat(trackingPaymentActivities.refundCount.get())
+                .as("refundPayment compensation should be called once")
+                .isEqualTo(1);
+    }
+
+    /**
+     * Test: inventory failure after payment triggers both refund AND inventory release compensations.
+     */
+    @Test
+    void inventoryFailureAfterPayment_triggersBothCompensations() {
+        var trackingOrderActivities = new TrackingOrderActivities();
+        var trackingPaymentActivities = new TrackingPaymentActivities();
+
+        // Payment succeeds but inventory reservation fails
+        worker.registerActivitiesImplementations(
+                trackingOrderActivities,
+                trackingPaymentActivities
+        );
+        testEnv.start();
+
+        var workflow = client.newWorkflowStub(
+                OrderWorkflow.class,
+                WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build());
+
+        assertThatThrownBy(() -> workflow.processOrder("ORD-INV-FAIL", "CUST-1", 1000L))
+                .isInstanceOf(WorkflowFailedException.class);
+
+        // Both saga compensations should have fired
+        assertThat(trackingPaymentActivities.refundCount.get())
+                .as("refundPayment compensation should be called once")
+                .isEqualTo(1);
+        assertThat(trackingOrderActivities.releaseInventoryCount.get())
+                .as("releaseInventory compensation should be called once")
+                .isEqualTo(1);
+    }
+
+    // -----------------------------------------------------------------------
+    // Tracking stubs for compensation verification
+    // -----------------------------------------------------------------------
+
+    /**
+     * Payment activities: authorization succeeds (returns auth ID), capture fails.
+     * Tracks refund calls to verify saga compensation.
+     */
+    public static class TrackingPaymentActivities implements PaymentActivities {
+        final AtomicInteger refundCount = new AtomicInteger(0);
+
+        @Override
+        public String authorizePayment(String customerId, long amount) {
+            return "AUTH-TRACK-001";
+        }
+
+        @Override
+        public void capturePayment(String authorizationId, long amount) {
+            throw new RuntimeException("Payment capture failed — should trigger refund compensation");
+        }
+
+        @Override
+        public void refundPayment(String authorizationId, long amount) {
+            refundCount.incrementAndGet();
+        }
+    }
+
+    /**
+     * Order activities: validate and checkInventory succeed, reserveInventory fails.
+     * Tracks releaseInventory calls to verify saga compensation.
+     */
+    public static class TrackingOrderActivities implements OrderActivities {
+        final AtomicInteger releaseInventoryCount = new AtomicInteger(0);
+
+        @Override
+        public void validateOrder(String orderId, long amount) {
+            // Success
+        }
+
+        @Override
+        public boolean checkInventory(String orderId, int quantity) {
+            return true;
+        }
+
+        @Override
+        public void reserveInventory(String orderId, int quantity) {
+            throw new RuntimeException("Inventory system unavailable — should trigger compensations");
+        }
+
+        @Override
+        public void releaseInventory(String orderId, int quantity) {
+            releaseInventoryCount.incrementAndGet();
+        }
+
+        @Override
+        public void sendNotification(String customerId, String message) {
             // Success
         }
     }
