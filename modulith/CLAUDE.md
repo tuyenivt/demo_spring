@@ -21,17 +21,17 @@ docker run -d --name demodb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=demodb
 modulith/
 ├── customer/          # Customer registration (no dependencies)
 ├── order/             # Order management (depends on customer)
-├── inventory/         # Stock management (listens to order events)
+├── inventory/         # Stock management (depends on order for events)
 └── shared/            # Cross-cutting concerns (API response, exceptions)
 ```
 
 ### Module Dependencies
 
-| Module    | Allowed Dependencies | Listens To              |
-|-----------|---------------------|-------------------------|
-| customer  | shared              | -                       |
-| order     | customer, shared    | CustomerRegisteredEvent |
-| inventory | shared              | OrderCreatedEvent       |
+| Module    | Allowed Dependencies  | Publishes                                                                        | Listens To                                           |
+|-----------|-----------------------|----------------------------------------------------------------------------------|------------------------------------------------------|
+| customer  | shared::api           | CustomerRegisteredEvent                                                          | -                                                    |
+| order     | customer, shared::api | OrderCreatedEvent, OrderConfirmedEvent, OrderCancelledEvent, OrderCompletedEvent | CustomerRegisteredEvent, StockReservationFailedEvent |
+| inventory | order, shared::api    | StockReservedEvent, StockReservationFailedEvent                                  | OrderCreatedEvent, OrderCancelledEvent               |
 
 ## Key Patterns
 
@@ -42,7 +42,7 @@ Each module declares dependencies in `package-info.java`:
 ```java
 @ApplicationModule(
     displayName = "Order Module",
-    allowedDependencies = {"customer", "shared"}
+    allowedDependencies = {"customer", "shared::api"}
 )
 package com.example.modulith.order;
 ```
@@ -64,22 +64,42 @@ Cross-module communication uses Spring events:
 
 ```java
 // Publishing (OrderService)
-eventPublisher.publishEvent(new OrderCreatedEvent(orderId, customerId, amount, createdAt));
+eventPublisher.publishEvent(new OrderCreatedEvent(orderId, customerId, amount, sku, quantity, createdAt));
 
 // Listening (InventoryEventListener)
 @ApplicationModuleListener
 public void on(OrderCreatedEvent event) { ... }
 ```
 
+### Order State Machine
+
+```
+PENDING → CONFIRMED → COMPLETED
+    ↘         ↘
+     CANCELLED  CANCELLED
+```
+
 ## API Endpoints
 
-| Method | Endpoint                          | Description          |
-|--------|-----------------------------------|----------------------|
-| POST   | /api/customers                    | Register customer    |
-| GET    | /api/customers/{id}/exists        | Check customer exists|
-| POST   | /api/orders                       | Create order         |
-| GET    | /api/inventory/check/{sku}        | Check stock          |
-| POST   | /api/inventory/reserve            | Reserve stock        |
+| Method | Endpoint                              | Description                                   |
+|--------|---------------------------------------|-----------------------------------------------|
+| POST   | /api/customers                        | Register customer                             |
+| GET    | /api/customers/{id}                   | Get customer                                  |
+| GET    | /api/customers/{id}/exists            | Check customer exists                         |
+| GET    | /api/customers                        | List customers (paginated)                    |
+| POST   | /api/orders                           | Create order                                  |
+| GET    | /api/orders/{orderId}                 | Get order                                     |
+| GET    | /api/orders                           | List orders (paginated, filter by customerId) |
+| PATCH  | /api/orders/{orderId}/confirm         | Confirm order (PENDING → CONFIRMED)           |
+| PATCH  | /api/orders/{orderId}/cancel          | Cancel order                                  |
+| PATCH  | /api/orders/{orderId}/complete        | Complete order (CONFIRMED → COMPLETED)        |
+| POST   | /api/inventory/products               | Create product                                |
+| GET    | /api/inventory/products               | List products (paginated)                     |
+| GET    | /api/inventory/products/{sku}         | Get product by SKU                            |
+| PUT    | /api/inventory/products/{sku}         | Update product (name, price)                  |
+| POST   | /api/inventory/products/{sku}/restock | Restock product                               |
+| GET    | /api/inventory/check/{sku}            | Check stock availability                      |
+| POST   | /api/inventory/reserve                | Reserve stock                                 |
 
 ## Database
 
@@ -93,6 +113,7 @@ public void on(OrderCreatedEvent event) { ... }
 - Spring Boot 3.x + Spring Modulith
 - JPA/Hibernate, Flyway, Lombok
 - springdoc-openapi for Swagger
+- spring-modulith-observability for distributed tracing
 
 ## Testing
 
@@ -101,6 +122,7 @@ public void on(OrderCreatedEvent event) { ... }
 ```
 
 Spring Modulith provides module structure verification via `spring-modulith-starter-test`.
+`ModulithStructureTests` also generates PlantUML module documentation.
 
 ## Configuration
 
@@ -108,4 +130,5 @@ Key settings in `application.yml`:
 - Virtual threads enabled
 - JPA open-in-view disabled
 - Modulith event JDBC persistence enabled
+- Events republished on restart (resilience)
 - Actuator exposes health, metrics, modulith endpoints
