@@ -4,8 +4,8 @@
 
 Spring Boot application demonstrating monitoring and observability using Actuator, Prometheus, and Grafana.
 
-- **Java**: 21
-- **Spring Boot**: 3.5.9
+- **Java**: 25
+- **Spring Boot**: 3.5.10
 - **Database**: H2 (in-memory)
 
 ## Project Structure
@@ -15,12 +15,15 @@ monitor/
 ├── src/main/java/com/example/monitor/
 │   ├── SpringMonitorApplication.java       # Entry point
 │   ├── config/
-│   │   ├── MetricsConfig.java              # Custom metrics (Counter, Timer)
+│   │   ├── MetricsConfig.java              # Aspects for @Timed, @Counted, @Observed + Random bean
 │   │   └── DataSeederConfig.java           # Sample data seeder
 │   ├── controller/RootController.java      # REST endpoints
+│   ├── endpoint/AppEndpoint.java           # Custom actuator endpoint (/actuator/app)
 │   ├── entity/Customer.java                # JPA entity
 │   ├── health/
-│   │   └── ExternalApiHealthIndicator.java # Custom health check
+│   │   └── ExternalApiHealthIndicator.java # Custom health check (toggleable)
+│   ├── info/AppInfoContributor.java        # Custom /actuator/info contributor
+│   ├── metrics/CustomerMetrics.java        # customer.total Gauge (MeterBinder)
 │   └── repository/CustomerRepository.java
 ├── src/main/resources/application.yml      # Configuration
 ├── src/gatling/java/.../CustomerSimulation.java  # Load testing
@@ -46,16 +49,20 @@ monitor/
 
 ## API Endpoints
 
-| Endpoint | Purpose |
-|----------|---------|
-| `GET /ping` | Health check (minimal latency) |
-| `GET /customers` | List all customers (increments `customer.access` counter) |
-| `GET /customers/transform` | Slow endpoint (0-5s delay), timed by `customer.transform` |
+| Endpoint                    | Purpose                                                                 |
+|-----------------------------|-------------------------------------------------------------------------|
+| `GET /ping`                 | Health check (minimal latency)                                          |
+| `GET /customers`            | List all customers (increments `customer.access` counter, `@Observed`)  |
+| `GET /customers/transform`  | Slow endpoint (0-5s delay), timed by `customer.transform` (`@Observed`) |
+| `GET /customers/unreliable` | Returns 500 randomly; `?failureRate=30` (0–100, default 30%)            |
+| `POST /health/toggle`       | Toggles `ExternalApiHealthIndicator` between UP/DOWN                    |
 
 ## Custom Metrics
 
-- `customer.access` - Counter for customer list accesses
-- `customer.transform` - Timer for transform operation duration
+- `customer.access` - Counter for customer list accesses (`@Counted`)
+- `customer.transform` - Timer for transform operation duration (`@Timed`); SLOs at 500ms/1s/3s, p50/p95/p99
+- `customer.total` - Gauge tracking total customers in DB (`CustomerMetrics` via `MeterBinder`)
+- `customer.list` / `customer.transform.observed` - Observation spans via `@Observed`
 
 ## Actuator Endpoints
 
@@ -64,6 +71,10 @@ monitor/
 - `/actuator/health/readiness` - Readiness probe (includes db, externalApi)
 - `/actuator/metrics` - Available metrics
 - `/actuator/prometheus` - Prometheus-formatted metrics
+- `/actuator/info` - App info (env + `AppInfoContributor`: name, description, java.version)
+- `/actuator/app` - Custom endpoint: customerCount + timestamp
+- `/actuator/loggers` - Logger levels
+- `/actuator/env` - Environment properties
 
 ## Configuration Highlights
 
